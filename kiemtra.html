@@ -1,0 +1,652 @@
+from pathlib import Path, PurePosixPath
+
+html = r"""<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bài kiểm tra HKI Hóa 12 (CTST) — Tương tác</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: light; }
+    .card { border: 1px solid rgba(0,0,0,.08); border-radius: 18px; background: #fff; }
+    .opt { border: 1px solid rgba(0,0,0,.12); border-radius: 14px; padding: 10px 12px; cursor: pointer; user-select:none;}
+    .opt:hover { background: rgba(59,130,246,.06); }
+    .opt[data-selected="true"] { border-color: rgba(59,130,246,.7); background: rgba(59,130,246,.08); }
+    .opt.correct { border-color: rgba(34,197,94,.9); background: rgba(34,197,94,.10); }
+    .opt.incorrect { border-color: rgba(239,68,68,.9); background: rgba(239,68,68,.10); }
+    .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; padding: 1px 6px; border-radius: 8px; border: 1px solid rgba(0,0,0,.12); background: rgba(0,0,0,.03); }
+    .stickybar { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(255,255,255,.82); border-bottom: 1px solid rgba(0,0,0,.08); }
+    .muted { color: rgba(0,0,0,.60); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    @media print{
+      .no-print { display: none !important; }
+      body { background: white; }
+      .card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <div class="stickybar no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-2 justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold">H12</div>
+        <div>
+          <div class="font-semibold leading-tight">Bài kiểm tra HKI Hóa 12 (CTST) — Tương tác</div>
+          <div class="text-sm muted">Gồm: 80 câu ABCD • 8 câu Đúng/Sai • 12 câu trả lời ngắn</div>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btnCheck" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow">Chấm điểm</button>
+        <button id="btnReveal" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow">Hiện đáp án</button>
+        <button id="btnReset" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 border shadow-sm">Làm lại</button>
+        <button id="btnPrint" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 border shadow-sm">In</button>
+      </div>
+    </div>
+    <div class="max-w-6xl mx-auto px-4 pb-3">
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <span class="badge">Tiến độ: <span id="progressText" class="font-semibold">0%</span></span>
+        <span class="badge">Đã làm: <span id="doneText" class="font-semibold">0</span></span>
+        <span class="badge">Tổng: <span id="totalText" class="font-semibold">0</span></span>
+        <span class="badge">Điểm: <span id="scoreText" class="font-semibold">—</span></span>
+        <span class="muted ml-2">Mẹo: chọn đáp án • cuộn nhanh bằng <span class="kbd">Ctrl</span> + <span class="kbd">F</span> (tìm “Câu 57”)</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+    <section class="card p-5">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold">Thông tin & cách làm</h2>
+          <p class="muted mt-1">Bài này dựng từ đề cương HKI Hóa 12 CTST. Một số câu có hình/kí hiệu (PS, PVC, sơ đồ lưu hóa) bạn đối chiếu trong PDF gốc nếu cần.</p>
+        </div>
+        <div class="text-sm muted">
+          <div><span class="mono">Lưu tự động</span>: trình duyệt sẽ lưu bài làm (localStorage).</div>
+          <div><span class="mono">Chấm điểm</span>: tính theo số câu đúng / tổng câu.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+        <h2 class="text-2xl font-bold">PHẦN I — Trắc nghiệm ABCD (80 câu)</h2>
+        <div class="text-sm muted">Mỗi câu chọn 1 đáp án.</div>
+      </div>
+      <div id="mcqRoot" class="space-y-4"></div>
+    </section>
+
+    <section>
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+        <h2 class="text-2xl font-bold">PHẦN II — Đúng / Sai (8 câu)</h2>
+        <div class="text-sm muted">Mỗi ý a–d chọn Đúng hoặc Sai.</div>
+      </div>
+      <div id="tfRoot" class="space-y-4"></div>
+    </section>
+
+    <section>
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+        <h2 class="text-2xl font-bold">PHẦN III — Trả lời ngắn (12 câu)</h2>
+        <div class="text-sm muted">Nhập đáp án (số). Dùng dấu phẩy hoặc dấu chấm đều được cho phần thập phân.</div>
+      </div>
+      <div id="shortRoot" class="space-y-4"></div>
+    </section>
+
+    <section class="card p-5">
+      <h2 class="text-xl font-bold">Kết quả</h2>
+      <div class="grid md:grid-cols-3 gap-3 mt-3">
+        <div class="p-4 rounded-2xl bg-slate-50 border">
+          <div class="muted text-sm">Đúng</div>
+          <div id="okBox" class="text-3xl font-bold">—</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-50 border">
+          <div class="muted text-sm">Sai</div>
+          <div id="badBox" class="text-3xl font-bold">—</div>
+        </div>
+        <div class="p-4 rounded-2xl bg-slate-50 border">
+          <div class="muted text-sm">Chưa làm</div>
+          <div id="naBox" class="text-3xl font-bold">—</div>
+        </div>
+      </div>
+      <p class="muted mt-3 text-sm">Lưu ý: điểm ở đây chỉ là điểm luyện tập (tính theo % đúng).</p>
+    </section>
+
+    <footer class="muted text-sm pb-10">
+      <div>© Bạn có thể sửa đề/đáp án trong biến <span class="mono">DATA</span> (ở cuối file).</div>
+    </footer>
+  </main>
+
+<script>
+/** =========================
+ *  DATA (Questions + Answers)
+ *  =========================
+ *  Đề bám theo file PDF đề cương HKI Hóa 12 CTST.
+ *  Một số câu có hình trong PDF, mình ghi chú "xem PDF".
+ */
+const DATA = {
+  meta: {
+    title: "HKI Hóa 12 (CTST)",
+    // Answer keys user chốt
+    mcqKey: {
+      1:"C",2:"A",3:"D",4:"B",5:"C",6:"D",7:"A",8:"C",9:"C",10:"A",
+      11:"C",12:"B",13:"B",14:"B",15:"C",16:"B",17:"C",18:"D",19:"D",20:"B",
+      21:"B",22:"D",23:"D",24:"C",25:"D",26:"D",27:"D",28:"C",29:"B",30:"A",
+      31:"A",32:"B",33:"D",34:"B",35:"A",36:"D",37:"B",38:"C",39:"C",40:"B",
+      41:"B",42:"C",43:"D",44:"C",45:"A",46:"C",47:"A",48:"B",49:"D",50:"B",
+      51:"A",52:"C",53:"C",54:"A",55:"D",56:"D",57:"D",58:"B",59:"D",60:"A",
+      61:"D",62:"A",63:"D",64:"A",65:"C",66:"C",67:"D",68:"B",69:"A",70:"D",
+      71:"C",72:"A",73:"A",74:"A",75:"B",76:"A",77:"A",78:"C",79:"B",80:"C"
+    },
+    // TF keys: each q has 4 booleans a-d. true = Đúng, false = Sai
+    tfKey: {
+      1: [true,false,true,false],
+      2: [true,true,false,true],
+      3: [true,true,true,true], // user chốt b là đúng theo CTST
+      4: [false,true,false,true],
+      5: [true,false,true,true],
+      6: [false,true,true,true],
+      7: [false,true,true,true],
+      8: [true,true,false,true]
+    },
+    shortKey: {
+      1:"4",2:"4",3:"2",4:"4",5:"2",6:"4",7:"4",8:"4",9:"12",10:"4",11:"0,34",12:"0,94"
+    }
+  },
+
+  mcq: [
+    {id:1, q:"Ester methyl acrylate có công thức là", opts:{A:"CH3COOCH3",B:"CH3COOCH=CH2",C:"CH2=CHCOOCH3",D:"HCOOCH3"}},
+    {id:2, q:"Ester nào sau đây tác dụng với dung dịch NaOH thu được sodium acetate?", opts:{A:"CH3COOC2H5",B:"C2H5COOCH3",C:"HCOOCH3",D:"HCOOC2H5"}},
+    {id:3, q:"Phát biểu nào sau đây là sai?", opts:{A:"Hầu hết ester nhẹ hơn nước, thường ít tan trong nước.",B:"Phản ứng thủy phân là phản ứng đặc trưng của ester và chất béo.",C:"Chất béo nhẹ hơn nước, không tan trong nước, tan trong dung môi không phân cực.",D:"Phản ứng thủy phân chất béo trong môi trường kiềm là phản ứng thuận nghịch."}},
+    {id:4, q:"Cấu tạo chung của xà phòng và chất giặt rửa tổng hợp phổ biến gồm mấy phần?", opts:{A:"1",B:"2",C:"3",D:"4"}},
+    {id:5, q:"Chất nào sau đây là thành phần chính của chất giặt rửa tổng hợp?", opts:{A:"C15H31COONa",B:"(C17H35COO)2Ca",C:"CH3[CH2]11C6H4SO3Na",D:"C17H35COOK"}},
+    {id:6, q:"Không nên dùng xà phòng khi giặt rửa với nước cứng vì", opts:{A:"cần dùng lượng nước nhiều hơn.",B:"gây ô nhiễm môi trường.",C:"ion Ca2+, Mg2+ làm giảm độ bền sợi vải.",D:"xuất hiện kết tủa làm giảm tác dụng giặt rửa của xà phòng."}},
+    {id:7, q:"Phát biểu nào sau đây không đúng?", opts:{A:"Carbohydrate là những hợp chất hữu cơ đa chức và thường có công thức chung là Cn(H2O)m.",B:"Carbohydrate được phân thành 3 loại: monosaccharide, disaccharide, polysaccharide.",C:"Monosaccharide là nhóm carbohydrate đơn giản nhất, không bị thủy phân.",D:"Disaccharide khi thủy phân hoàn toàn, mỗi phân tử tạo thành hai phân tử monosaccharide."}},
+    {id:8, q:"Phát biểu nào sau đây không đúng khi nói về glucose và fructose?", opts:{A:"Đều tạo được dung dịch màu xanh lam khi tác dụng với Cu(OH)2 trong môi trường kiềm.",B:"Đều tạo kết tủa đỏ gạch Cu2O khi tác dụng với Cu(OH)2, đun nóng trong môi trường kiềm.",C:"Đều làm mất màu nước bromine.",D:"Đều xảy ra phản ứng tráng bạc với thuốc thử Tollens."}},
+    {id:9, q:"Saccharose tham gia phản ứng nào sau đây?", opts:{A:"Phản ứng với thuốc thử Tollens.",B:"Phản ứng với nước bromine.",C:"Phản ứng với Cu(OH)2 tạo dung dịch màu xanh lam.",D:"Phản ứng thuỷ phân trong môi trường kiềm."}},
+    {id:10, q:"Chất X tạo thành trong cây xanh nhờ quang hợp. Thủy phân hoàn toàn X (xúc tác acid) thu được Y. Y có nhiều trong quả nho chín (đường nho). X và Y lần lượt là", opts:{A:"tinh bột và glucose",B:"cellulose và saccharose",C:"cellulose và fructose",D:"tinh bột và saccharose"}},
+
+    {id:11, q:"Chất nào sau đây là amine?", opts:{A:"CH3OH",B:"H2NCH2COOH",C:"CH3NH2",D:"HCOOH"}},
+    {id:12, q:"Khi thay thế nguyên tử hydrogen trong ammonia bằng gốc hydrocarbon thu được", opts:{A:"Carbohydrate",B:"Amine",C:"Ester",D:"Carboxylic acid"}},
+    {id:13, q:"Công thức phân tử của dimethylamine là", opts:{A:"C2H8N2",B:"C2H7N",C:"C4H11N",D:"CH6N2"}},
+    {id:14, q:"Công thức cấu tạo thu gọn của aniline là", opts:{A:"CH3NH2",B:"C6H5NH2",C:"C2H5NH2",D:"C6H5CH2NH2"}},
+    {id:15, q:"Ở điều kiện thường, chất nào sau đây ở thể khí?", opts:{A:"Ethyl alcohol",B:"Acetic acid",C:"Methylamine",D:"Phenylamine"}},
+    {id:16, q:"Dung dịch chất nào sau đây làm xanh giấy quỳ tím?", opts:{A:"CH3COOH",B:"C2H5NH2",C:"C6H5NH2 (aniline)",D:"HCl"}},
+    {id:17, q:"Amine thể hiện tính base khi tác dụng với cặp chất nào sau đây?", opts:{A:"O2, CuSO4",B:"NaNO3, HCl",C:"FeCl3, H2SO4",D:"Cl2, HCl"}},
+    {id:18, q:"Trong phản ứng với nước bromine, aniline thể hiện phản ứng", opts:{A:"cộng halogen vào nhóm -NH2",B:"thế halogen vào nhóm -NH2",C:"cộng halogen vào vòng benzene",D:"thế hydrogen trên vòng benzene"}},
+    {id:19, q:"Amine không được ứng dụng trong lĩnh vực nào?", opts:{A:"Dược phẩm",B:"Phẩm nhuộm",C:"Công nghiệp polymer",D:"Công nghiệp silicate"}},
+    {id:20, q:"Khử mùi tanh của cá (do amine) trước chế biến nên", opts:{A:"Ngâm trong nước",B:"Rửa bằng giấm ăn",C:"Rửa bằng dung dịch soda",D:"Rửa bằng nước muối"}},
+
+    {id:21, q:"Bảng thí nghiệm: X làm quỳ tím hóa xanh; Y tạo Ag với AgNO3/NH3; Z tạo kết tủa trắng với nước bromine. X,Y,Z lần lượt là", opts:{A:"Aniline, glucose, ethylamine",B:"Ethylamine, glucose, aniline",C:"Ethylamine, aniline, glucose",D:"Glucose, ethylamine, aniline"}},
+    {id:22, q:"Chất nào sau đây là amino acid?", opts:{A:"HOCH2COOH",B:"CH3COOH",C:"CH3NH2",D:"H2NCH2COOH"}},
+    {id:23, q:"Hợp chất H2NCH2COOH có tên là", opts:{A:"valine",B:"lysine",C:"alanine",D:"glycine"}},
+    {id:24, q:"Tên gọi nào sau đây không phù hợp với CH3-CH(NH2)-COOH?", opts:{A:"2-aminopropanoic acid",B:"α-aminopropionic acid",C:"Aniline",D:"alanine"}},
+    {id:25, q:"Phát biểu nào sau đây là đúng?", opts:{A:"Các amino acid là hợp chất hữu cơ đa chức.",B:"Dung dịch amino acid không làm đổi màu quỳ tím.",C:"Hầu hết amino acid ở thể rắn và ít tan trong nước.",D:"Amino acid trong tự nhiên thường là α-amino acid."}},
+    {id:26, q:"Amino acid không có loại phản ứng nào sau đây?", opts:{A:"Với acid và base",B:"Ester hoá",C:"Trùng ngưng",D:"Thuỷ phân"}},
+    {id:27, q:"Các chất: (1) H2NCH2COOH; (2) C2H5COOH; (3) C2H5NH2; (4) H2NCH2CH2CH(NH2)COOH; (5) C6H5NH2. Chất vừa phản ứng với acid vừa với base là", opts:{A:"(1),(2)",B:"(4),(5)",C:"(2),(3)",D:"(1),(4)"}},
+    {id:28, q:"Peptide được tạo thành từ", opts:{A:"đơn vị glucose",B:"acid béo",C:"đơn vị α-amino acid",D:"đơn vị hydrocarbon"}},
+    {id:29, q:"Nhóm peptide có cấu tạo là", opts:{A:"-CO-NH2",B:"-CO-NH-",C:"-COOH",D:"-CO-"}},
+    {id:30, q:"Chất nào là một dipeptide?", opts:{A:"Gly-Ala",B:"Gly-Ala-Val",C:"Gly-Gly-Ala-Val",D:"Val"}},
+
+    {id:31, q:"Số liên kết peptide trong Gly-Ala-Phe-Gly là", opts:{A:"3",B:"4",C:"2",D:"1"}},
+    {id:32, q:"Nhận biết peptide (trừ dipeptide) dùng", opts:{A:"màu với iodine",B:"màu biuret",C:"Tollens",D:"Fehling"}},
+    {id:33, q:"Peptide có từ hai liên kết peptide trở lên phản ứng biuret cho màu", opts:{A:"vàng",B:"xanh",C:"đỏ",D:"tím"}},
+    {id:34, q:"Phát biểu nào sau đây đúng?", opts:{A:"Pentapeptide mạch hở có 5 LK peptide.",B:"Tất cả peptide đều có thể thủy phân.",C:"Tripeptide không có phản ứng biuret.",D:"Thủy phân không hoàn toàn peptide chỉ cho amino acid."}},
+    {id:35, q:"Phát biểu nào sau đây là sai?", opts:{A:"Protein là hợp chất cao phân tử được hình thành từ một peptide.",B:"Protein hình sợi (α-keratin/collagen) không tan trong nước.",C:"Protein hình cầu (hemoglobin/albumin) có thể tan tạo dung dịch keo.",D:"Protein phân loại thành protein đơn giản và protein phức tạp."}},
+    {id:36, q:"Phát biểu nào sau đây là không đúng?", opts:{A:"LK peptide trong protein bị thủy phân trong acid/base hoặc enzyme.",B:"Protein + Cu(OH)2/OH− cho màu tím.",C:"Protein có thể đông tụ do nhiệt.",D:"Protein + HNO3 tạo chất rắn màu trắng."}},
+    {id:37, q:"Tính chất hóa học của peptide và protein đều có", opts:{A:"nitro hóa",B:"thủy phân",C:"trùng ngưng",D:"trùng hợp"}},
+    {id:38, q:"Phát biểu nào sau đây là không đúng?", opts:{A:"Đun nóng lòng trắng trứng: lỏng → rắn.",B:"Protein là chuỗi polypeptide từ nhiều α-amino acid.",C:"Albumin lòng trắng trứng là protein hình sợi và không tan trong nước.",D:"Nhỏ HNO3 vào lòng trắng trứng, màu chuyển vàng."}},
+    {id:39, q:"Trong nghiên cứu hóa học, enzyme đóng vai trò", opts:{A:"định lượng/định tính/chẩn đoán xét nghiệm",B:"sản xuất phân bón vi sinh",C:"xúc tác cho phản ứng",D:"chế biến thực phẩm"}},
+    {id:40, q:"Khi nấu canh cua/tôm/tép thấy mảng thịt đóng rắn lại do", opts:{A:"đông tụ do thay đổi pH",B:"đông tụ do nhiệt độ",C:"kết tủa carbonate khoáng",D:"thủy phân protein do nhiệt"}},
+
+    {id:41, q:"Polymer là hợp chất hữu cơ có phân tử khối ...(1)... do nhiều ...(2)... liên kết tạo nên.", opts:{A:"(1) lớn; (2) chất",B:"(1) lớn; (2) mắt xích",C:"(1) nhỏ; (2) mắt xích",D:"(1) nhỏ; (2) chất"}},
+    {id:42, q:"Polymer nào sau đây thuộc polymer thiên nhiên?", opts:{A:"Polystyrene",B:"Polypropylene",C:"Tinh bột",D:"Polyethylene"}},
+    {id:43, q:"Polymer nào chỉ có 2 nguyên tố C và H?", opts:{A:"Poly(methyl methacrylate)",B:"Poly(vinyl chloride)",C:"Poly(phenol formaldehyde)",D:"Polystyrene"}},
+    {id:44, q:"Kí hiệu PS là polymer nào? (xem hình trong PDF)", opts:{A:"Polypropylene",B:"Polysaccharide",C:"Polystyrene",D:"Polyisoprene"}},
+    {id:45, q:"Kí hiệu PVC là polymer nào? (xem hình trong PDF)", opts:{A:"Poly(vinyl chloride)",B:"Polyethylene",C:"Polystyrene",D:"Poly(vinyl acetate)"}},
+    {id:46, q:"Theo sơ đồ lưu hóa cao su (xem PDF), quá trình lưu hóa thuộc loại phản ứng", opts:{A:"cắt mạch polymer",B:"giữ nguyên mạch polymer",C:"tăng mạch polymer",D:"phân huỷ polymer"}},
+    {id:47, q:"Polystyrene bị nhiệt phân thu được styrene. Phản ứng thuộc loại", opts:{A:"cắt mạch polymer",B:"giữ nguyên mạch polymer",C:"tăng mạch polymer",D:"phân huỷ polymer"}},
+    {id:48, q:"Poly(vinyl acetate) bị thủy phân trong môi trường kiềm. Phản ứng thuộc loại", opts:{A:"cắt mạch polymer",B:"giữ nguyên mạch polymer",C:"tăng mạch polymer",D:"phân huỷ polymer"}},
+    {id:49, q:"Kết hợp nhiều monomer tạo polymer và giải phóng phân tử nhỏ (thường H2O) gọi là", opts:{A:"trùng hợp",B:"thế",C:"tách",D:"trùng ngưng"}},
+    {id:50, q:"Chất nào có thể tham gia phản ứng trùng ngưng?", opts:{A:"C6H6",B:"H2N[CH2]6COOH",C:"C6H5CH=CH2",D:"CH2=CHCH3"}},
+
+    {id:51, q:"Monomer trùng hợp tạo PMMA là", opts:{A:"CH2=C(CH3)COOCH3",B:"CH2=CHCOOCH3",C:"CH2=CHC6H5",D:"CH2=CHCl"}},
+    {id:52, q:"PP được tổng hợp từ monomer", opts:{A:"CH2=CH2",B:"CH2=CHCN",C:"CH3CH=CH2",D:"C6H5OH và HCHO"}},
+    {id:53, q:"Monomer tạo các polymer: (CH2-CH2)n ; (CH2=CH-CH=CH2)n ; (HN[CH2]5CO)n lần lượt là", opts:{A:"CH2=CH2; CH3-CH=CH-CH3; H2N-CH2-CH2-COOH",B:"CH2=CHCl; CH3-CH=CH-CH3; H2N-CH(NH2)-COOH",C:"CH2=CH2; CH2=CH-CH=CH2; H2N-[CH2]5-COOH",D:"CH2=CH2; CH3-CH=C=CH2; H2N-[CH2]5-COOH"}},
+    {id:54, q:"PE được điều chế từ monomer", opts:{A:"Ethylene",B:"Propylene",C:"Styrene",D:"Vinyl chloride"}},
+    {id:55, q:"(1) Chất dẻo là vật liệu polymer có tính dẻo. (2) Chất dẻo gồm polymer, chất hóa dẻo, chất độn. (3) Composite gồm vật liệu nền và vật liệu cốt. (4) Composite cốt sợi dùng làm bộ phận máy bay/tàu thủy. Số phát biểu đúng là", opts:{A:"1",B:"2",C:"3",D:"4"}},
+    {id:56, q:"Định nghĩa đúng về vật liệu composite?", opts:{A:"polymer có tính dẻo",B:"polymer có tính đàn hồi",C:"tổ hợp vật liệu tạo tính chất tương tự vật liệu ban đầu",D:"tổ hợp vật liệu tạo tính chất vượt trội so với vật liệu ban đầu"}},
+    {id:57, q:"Vật liệu composite không có ứng dụng nào?", opts:{A:"tấm ốp trang trí/cánh cửa/ván sàn",B:"thân vỏ máy bay/tàu thuyền",C:"gỗ nhựa/bê tông nhựa",D:"túi nylon/bao gói/màng bọc thực phẩm"}},
+    {id:58, q:"Biện pháp nào không làm giảm rác thải nhựa?", opts:{A:"tái chế/tái sử dụng",B:"khuyến khích sử dụng túi nylon",C:"mang theo túi khi mua sắm",D:"dùng vật liệu phân hủy sinh học"}},
+    {id:59, q:"Tơ là vật liệu polymer", opts:{A:"có tính đàn hồi",B:"dạng sợi và không thấm nước",C:"có tính dẻo",D:"dạng sợi mảnh và độ bền nhất định"}},
+    {id:60, q:"Tơ tằm, sợi bông, len thuộc loại", opts:{A:"tơ tự nhiên",B:"tơ tổng hợp",C:"tơ bán tổng hợp",D:"tơ nhân tạo"}},
+
+    {id:61, q:"Nylon-6,6 thuộc loại tơ", opts:{A:"tơ polyester",B:"tơ bán tổng hợp",C:"tơ thiên nhiên",D:"tơ tổng hợp"}},
+    {id:62, q:"Tơ nào thuộc loại polymer tổng hợp?", opts:{A:"Poly(vinyl chloride)",B:"Tinh bột",C:"Tơ visco",D:"Tơ tằm"}},
+    {id:63, q:"Trùng hợp chất nào thu được cao su buna?", opts:{A:"CH2=C(CH3)–CH=CH2",B:"CH3–CH=C=CH2",C:"CH3–CH(Cl)–CH=CH2",D:"CH2=CH–CH=CH2"}},
+    {id:64, q:"Cao su buna-S (SBR) thu được khi trùng hợp", opts:{A:"CH2=CHCH=CH2 và C6H5CH=CH2",B:"CH2=CHCH=CH2 và sulfur",C:"CH2=CHCH=CH2 và CH2=CHCl",D:"CH2=CHCH=CH2 và CH2=CHCN"}},
+    {id:65, q:"Các chất: CH2=CHCl; CH2=CHCH3; CH2=CHCH=CH2; H2N[CH2]5COOH. Số chất có khả năng trùng hợp là", opts:{A:"1",B:"2",C:"3",D:"4"}},
+    {id:66, q:"Phát biểu nào sau đây sai?", opts:{A:"Tơ nitron là tơ tổng hợp",B:"Tơ nylon-6,6 là tơ tổng hợp",C:"Tơ visco là tơ thiên nhiên",D:"Tơ acetate là tơ bán tổng hợp"}},
+    {id:67, q:"Ứng dụng đất sét polymer (PVC trộn chất lỏng) dựa vào tính chất nào của PVC?", opts:{A:"đàn hồi",B:"cứng",C:"không độc hại",D:"dẻo"}},
+    {id:68, q:"Cao su tự nhiên chứa mắt xích của", opts:{A:"Styrene",B:"Isoprene",C:"Ethylene",D:"Buta-1,3-diene"}},
+    {id:69, q:"Keo dán là vật liệu polymer có", opts:{A:"khả năng kết dính hai mảnh vật liệu rắn với nhau mà không làm thay đổi vật liệu kết dính",B:"khả năng tạo liên kết H giữa các vật liệu",C:"thành phần gồm vật liệu cốt và nền là chất kết dính",D:"khả năng kết dính khi thêm chất đóng rắn"}},
+    {id:70, q:"Keo dùng để vá săm/lốp xe là", opts:{A:"keo epoxy",B:"keo 502",C:"keo poly(ure-formaldehyde)",D:"nhựa vá săm"}},
+
+    {id:71, q:"Đâu không phải là một loại keo dán tổng hợp?", opts:{A:"Nhựa vá săm",B:"Keo epoxy",C:"Cao su lưu hóa",D:"Keo poly(ure-formaldehyde)"}},
+    {id:72, q:"Cho (a)-(e) về PS, tơ tằm, đốt nhựa, cao su lưu hóa, vai trò vật liệu nền composite. Số phát biểu đúng là", opts:{A:"4",B:"3",C:"2",D:"5"}},
+    {id:73, q:"Phát biểu nào không đúng về pin Galvani?", opts:{A:"Ở điện cực dương xảy ra oxi hoá",B:"Cathode là kim loại yếu hơn, là điện cực dương",C:"Anode là kim loại mạnh hơn, là điện cực âm",D:"Phản ứng hóa học kèm giải phóng điện năng"}},
+    {id:74, q:"Kí hiệu cặp oxi hoá – khử ứng với quá trình khử: Fe3+ + e → Fe2+ là", opts:{A:"Fe3+/Fe2+",B:"Fe2+/Fe",C:"Fe3+/Fe",D:"Fe2+/Fe3+"}},
+    {id:75, q:"Cho E°: Mg2+/Mg=-2,37; Ag+/Ag=0,80; Fe2+/Fe=-0,44; Ni2+/Ni=-0,25. Sắp xếp ion theo chiều tăng dần tính oxi hoá:", opts:{A:"Mg2+; Ag+; Fe2+; Ni2+",B:"Mg2+; Fe2+; Ni2+; Ag+",C:"Ag+; Ni2+; Fe2+; Mg2+",D:"Ni2+; Fe2+; Mg2+; Ag+"}},
+    {id:76, q:"Pin điện hoá Zn – Fe. Chất khử và chất oxi hoá là", opts:{A:"Zn là chất khử, Fe2+ là chất oxi hoá",B:"Zn là chất oxi hoá, Fe2+ là chất khử",C:"Zn2+ là chất khử, Fe là chất oxi hoá",D:"Zn2+ là chất oxi hoá, Fe là chất khử"}},
+    {id:77, q:"E°(Cu2+/Cu)=+0,340; E°(Zn2+/Zn)=-0,763. Công thức tính E°pin (Cu/Zn) là", opts:{A:"E°pin = E°1 − E°2",B:"E°pin = E°1 + E°2",C:"E°pin = −E°2 − E°1",D:"E°pin = E°2 − E°1"}},
+    {id:78, q:"Các phát biểu về pin nhiên liệu, số phát biểu đúng là", opts:{A:"2",B:"3",C:"4",D:"5"}},
+    {id:79, q:"E°(Ag+/Ag)=0,80; E°(Hg2+/Hg)=0,85. Phản ứng nào xảy ra được?", opts:{A:"Hg + Ag → Hg2+ + Ag",B:"Hg2+ + Ag → Hg + Ag+",C:"Hg2+ + Ag+ → Hg + Ag",D:"Hg + Ag → Hg2+ + Ag+"}},
+    {id:80, q:"E°: Fe2+/Fe=-0,44; Na+/Na=-2,713; Ag+/Ag=+0,799; Mg2+/Mg=-2,353; Cu2+/Cu=+0,340. Ở ĐK chuẩn, Cu khử được ion nào?", opts:{A:"Na+",B:"Mg2+",C:"Ag+",D:"Fe2+"}}
+  ],
+
+  tf: [
+    {id:1, stem:"Amine là dẫn xuất của ammonia...", items:[
+      "Thành phần nguyên tố có trong phân tử amine là C, H và N.",
+      "Amine là loại hợp chất có nhóm -NH2 trong phân tử.",
+      "Tương tự ammonia, N trong amine tạo ba liên kết cộng hoá trị với H hoặc gốc hydrocarbon.",
+      "CH3NH2, CH3NHC2H5, CH3CONH2 đều là amine."
+    ]},
+    {id:2, stem:"Tính chất của amine", items:[
+      "Dung dịch aniline không làm quỳ tím ẩm hoá xanh.",
+      "Dung dịch ethylamine phản ứng được với dung dịch HCl.",
+      "Dung dịch methylamine phản ứng được với dung dịch FeCl3 ở điều kiện thường.",
+      "Dung dịch aniline phản ứng với nước bromine tạo kết tủa trắng."
+    ]},
+    {id:3, stem:"Amino acid", items:[
+      "Amino acid là hợp chất hữu cơ tạp chức, chứa đồng thời -COOH và -NH2.",
+      "Ở điều kiện thường, amino acid là chất rắn, khi ở dạng kết tinh, chúng không màu.",
+      "Amino acid thường tan nhiều trong nước, nhiệt độ nóng chảy cao.",
+      "Amino acid có thể có sẵn trong tự nhiên hoặc được tổng hợp qua quá trình hoá học."
+    ]},
+    {id:4, stem:"Tính chất amino acid", items:[
+      "Các amino acid chỉ có tính acid.",
+      "Chỉ dùng quỳ tím có thể phân biệt ba dung dịch: alanine, lysine, glutamic acid.",
+      "Trùng ngưng ω-aminocaproic acid thu được policaproamide.",
+      "H2NCH(CH3)COOCH3 là sản phẩm ester hoá giữa alanine và methanol."
+    ]},
+    {id:5, stem:"Thí nghiệm với NaOH/CuSO4 và lòng trắng trứng", items:[
+      "Bước 1 thu được kết tủa màu xanh của Cu(OH)2.",
+      "Bước 2 kết tủa tan dần tạo dung dịch màu xanh lam.",
+      "Phản ứng này gọi là phản ứng màu biuret.",
+      "Phân biệt Ala-Gly và Gly-Val-Ala dùng thuốc thử Cu(OH)2/OH−."
+    ]},
+    {id:6, stem:"Thí nghiệm đun lòng trắng trứng", items:[
+      "Đông tụ do thủy phân protein thành α-amino acid.",
+      "Đông tụ do cấu trúc ban đầu của protein bị biến đổi.",
+      "Nấu canh cua thấy “riêu cua” nổi lên do đông tụ protein.",
+      "Nếu nhỏ thêm vài giọt giấm ăn vẫn xảy ra đông tụ."
+    ]},
+    {id:7, stem:"Polymer", items:[
+      "Ở điều kiện thường, polymer thường là chất lỏng, không tan trong nước, không có nhiệt độ nóng chảy xác định.",
+      "Lưu hoá cao su (đun cao su với sulfur) thu polymer mạng không gian thuộc phản ứng tăng mạch polymer.",
+      "Trùng hợp là quá trình kết hợp nhiều phân tử nhỏ giống/ tương tự tạo polymer.",
+      "Monomer trùng ngưng chứa ít nhất hai nhóm chức có khả năng phản ứng để tạo polymer."
+    ]},
+    {id:8, stem:"Hộp bã mía và hộp xốp", items:[
+      "Thành phần chính của hộp bã mía là cellulose.",
+      "Hộp bã mía phân huỷ sinh học được nên thân thiện môi trường.",
+      "Hộp xốp PS cũng là vật liệu dễ phân huỷ sinh học.",
+      "Hộp bã mía là polymer thiên nhiên; hộp xốp là polymer tổng hợp."
+    ]}
+  ],
+
+  short: [
+    {id:1, q:"Trong phân tử peptide cho dưới đây có bao nhiêu liên kết peptide? (xem hình trong PDF)"},
+    {id:2, q:"Trong phân tử peptide cho dưới đây có bao nhiêu liên kết peptide? (xem hình trong PDF)"},
+    {id:3, q:"Keratin, collagen, myosin, hemoglobin, albumin, fibroin. Có bao nhiêu protein tan được trong nước tạo dung dịch keo?"},
+    {id:4, q:"Các chất: lysine, methylamine, aniline, Gly-Ala. Có bao nhiêu chất tác dụng được với dung dịch HCl?"},
+    {id:5, q:"Các dung dịch: glycerol, albumin, saccharose, glucose, Ala-Gly, Val-Ala-Gly. Số dung dịch phản ứng màu biuret là bao nhiêu?"},
+    {id:6, q:"Các phát biểu về enzyme (a–d). Số phát biểu đúng là"},
+    {id:7, q:"Các phát biểu (1)–(4) về tơ. Số phát biểu đúng là"},
+    {id:8, q:"Trong: bông, len, tơ tằm, cellulose, nylon-6,6, polyethylene, PVC. Có bao nhiêu polymer thiên nhiên?"},
+    {id:9, q:"Với các ion Fe2+, Zn2+, Cu2+, Ag+. Số ion có thể oxi hoá được kim loại Fe là bao nhiêu?"},
+    {id:10, q:"Trong Li, Ba, Na, Mg, Fe, Ni. Có bao nhiêu kim loại có tính khử mạnh hơn Zn?"},
+    {id:11, q:"Pin Fe–Cu có E°pin = 0,78 V và E°(Fe2+/Fe) = −0,44 V. Tính E°(Cu2+/Cu) (làm tròn đến 0,01)."},
+    {id:12, q:"Cho E°(Ag+/Ag)=+0,80 V; E°(Sn2+/Sn)=−0,14 V. Tính E°pin (Sn–Ag) (làm tròn đến 0,01)."}
+  ]
+};
+
+/** =========================
+ *  RENDERING
+ *  ========================= */
+const els = {
+  mcqRoot: document.getElementById("mcqRoot"),
+  tfRoot: document.getElementById("tfRoot"),
+  shortRoot: document.getElementById("shortRoot"),
+  progressText: document.getElementById("progressText"),
+  doneText: document.getElementById("doneText"),
+  totalText: document.getElementById("totalText"),
+  scoreText: document.getElementById("scoreText"),
+  okBox: document.getElementById("okBox"),
+  badBox: document.getElementById("badBox"),
+  naBox: document.getElementById("naBox"),
+  btnCheck: document.getElementById("btnCheck"),
+  btnReset: document.getElementById("btnReset"),
+  btnReveal: document.getElementById("btnReveal"),
+  btnPrint: document.getElementById("btnPrint"),
+};
+
+const STORE_KEY = "hoa12_ctst_hki_quiz_v1";
+let state = loadState() || { mcq:{}, tf:{}, short:{} };
+
+function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)); }catch(e){ return null; } }
+
+function normShort(s){
+  if(s == null) return "";
+  return String(s).trim().replace(/\s+/g," ").replace(".", ","); // allow dot => comma
+}
+function isShortCorrect(id, userVal){
+  const key = normShort(DATA.meta.shortKey[id]);
+  const v = normShort(userVal);
+  return v !== "" && v === key;
+}
+
+function renderMCQ(){
+  els.mcqRoot.innerHTML = "";
+  for(const item of DATA.mcq){
+    const chosen = state.mcq[item.id] || "";
+    const card = document.createElement("div");
+    card.className = "card p-5";
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-sm muted">Câu ${item.id}</div>
+          <div class="text-base font-semibold mt-0.5">${escapeHTML(item.q)}</div>
+        </div>
+        <div class="badge" id="mcqBadge_${item.id}">—</div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-2 mt-4" id="mcqOpts_${item.id}"></div>
+    `;
+    const optsRoot = card.querySelector(`#mcqOpts_${item.id}`);
+    for(const k of ["A","B","C","D"]){
+      const div = document.createElement("div");
+      div.className = "opt";
+      div.setAttribute("role", "button");
+      div.dataset.qid = item.id;
+      div.dataset.choice = k;
+      div.dataset.selected = (chosen === k) ? "true" : "false";
+      div.innerHTML = `<span class="font-semibold">${k}.</span> <span>${escapeHTML(item.opts[k])}</span>`;
+      div.addEventListener("click", () => {
+        state.mcq[item.id] = k;
+        saveState();
+        updateMCQSelection(item.id);
+        updateProgress();
+      });
+      optsRoot.appendChild(div);
+    }
+    els.mcqRoot.appendChild(card);
+  }
+}
+
+function updateMCQSelection(id){
+  const root = document.getElementById(`mcqOpts_${id}`);
+  if(!root) return;
+  const chosen = state.mcq[id] || "";
+  for(const node of root.querySelectorAll(".opt")){
+    node.dataset.selected = (node.dataset.choice === chosen) ? "true" : "false";
+  }
+  const badge = document.getElementById(`mcqBadge_${id}`);
+  badge.textContent = chosen ? `Đã chọn: ${chosen}` : "Chưa chọn";
+}
+
+function renderTF(){
+  els.tfRoot.innerHTML = "";
+  for(const t of DATA.tf){
+    const card = document.createElement("div");
+    card.className = "card p-5";
+    const rows = t.items.map((txt, idx) => {
+      const key = `q${t.id}_${idx}`;
+      const val = state.tf[key]; // true/false/undefined
+      return `
+        <div class="p-3 rounded-2xl border bg-slate-50">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="font-semibold">Ý ${String.fromCharCode(97+idx)})</div>
+            <div class="flex gap-2">
+              <button class="tfbtn px-3 py-1.5 rounded-xl border bg-white hover:bg-slate-100" data-k="${key}" data-v="true">Đúng</button>
+              <button class="tfbtn px-3 py-1.5 rounded-xl border bg-white hover:bg-slate-100" data-k="${key}" data-v="false">Sai</button>
+            </div>
+          </div>
+          <div class="mt-2">${escapeHTML(txt)}</div>
+          <div class="mt-2 text-sm muted">Bạn chọn: <span id="tfPick_${key}" class="font-semibold">${val===true?"Đúng":val===false?"Sai":"—"}</span></div>
+        </div>
+      `;
+    }).join("");
+
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-sm muted">Câu ${t.id}</div>
+          <div class="text-base font-semibold mt-0.5">${escapeHTML(t.stem)}</div>
+        </div>
+        <div class="badge" id="tfBadge_${t.id}">—</div>
+      </div>
+      <div class="mt-4 space-y-2">${rows}</div>
+    `;
+
+    card.querySelectorAll(".tfbtn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const k = btn.dataset.k;
+        const v = (btn.dataset.v === "true");
+        state.tf[k] = v;
+        saveState();
+        document.getElementById(`tfPick_${k}`).textContent = v ? "Đúng" : "Sai";
+        updateTFBadge(t.id);
+        updateProgress();
+      });
+    });
+
+    els.tfRoot.appendChild(card);
+    updateTFBadge(t.id);
+  }
+}
+
+function updateTFBadge(qid){
+  const badge = document.getElementById(`tfBadge_${qid}`);
+  const keys = [0,1,2,3].map(i=>`q${qid}_${i}`);
+  const done = keys.filter(k=>state.tf[k]===true || state.tf[k]===false).length;
+  badge.textContent = `${done}/4 ý`;
+}
+
+function renderShort(){
+  els.shortRoot.innerHTML = "";
+  for(const s of DATA.short){
+    const val = state.short[s.id] ?? "";
+    const card = document.createElement("div");
+    card.className = "card p-5";
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-sm muted">Câu ${s.id}</div>
+          <div class="text-base font-semibold mt-0.5">${escapeHTML(s.q)}</div>
+        </div>
+        <div class="badge" id="shortBadge_${s.id}">—</div>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <input class="w-56 px-4 py-2 rounded-xl border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="Nhập đáp án…" value="${escapeAttr(val)}" id="shortInp_${s.id}" />
+        <span class="muted text-sm">Ví dụ: <span class="mono">${escapeHTML(DATA.meta.shortKey[s.id])}</span></span>
+      </div>
+    `;
+    const inp = card.querySelector(`#shortInp_${s.id}`);
+    inp.addEventListener("input", ()=>{
+      state.short[s.id] = inp.value;
+      saveState();
+      updateShortBadge(s.id);
+      updateProgress();
+    });
+    els.shortRoot.appendChild(card);
+    updateShortBadge(s.id);
+  }
+}
+
+function updateShortBadge(id){
+  const badge = document.getElementById(`shortBadge_${id}`);
+  const v = normShort(state.short[id] ?? "");
+  badge.textContent = v ? "Đã nhập" : "Chưa nhập";
+}
+
+function escapeHTML(str){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function escapeAttr(str){
+  return escapeHTML(str).replace(/"/g,"&quot;");
+}
+
+function computeTotals(){
+  const totalMcq = DATA.mcq.length;
+  const totalTf = DATA.tf.length * 4;
+  const totalShort = DATA.short.length;
+  return { totalMcq, totalTf, totalShort, total: totalMcq + totalTf + totalShort };
+}
+
+function computeDone(){
+  let done = 0;
+  // mcq
+  for(const item of DATA.mcq){
+    if(state.mcq[item.id]) done++;
+  }
+  // tf
+  for(const t of DATA.tf){
+    for(let i=0;i<4;i++){
+      const k = `q${t.id}_${i}`;
+      if(state.tf[k]===true || state.tf[k]===false) done++;
+    }
+  }
+  // short
+  for(const s of DATA.short){
+    if(normShort(state.short[s.id] ?? "") !== "") done++;
+  }
+  return done;
+}
+
+function grade(reveal=false){
+  let ok=0, bad=0, na=0;
+
+  // reset styles
+  document.querySelectorAll(".opt").forEach(n=>n.classList.remove("correct","incorrect"));
+
+  // MCQ grading
+  for(const item of DATA.mcq){
+    const chosen = state.mcq[item.id];
+    const correct = DATA.meta.mcqKey[item.id];
+    if(!chosen){ na++; continue; }
+    if(chosen === correct) ok++; else bad++;
+
+    if(reveal){
+      const root = document.getElementById(`mcqOpts_${item.id}`);
+      if(root){
+        for(const node of root.querySelectorAll(".opt")){
+          if(node.dataset.choice === correct) node.classList.add("correct");
+          if(chosen !== correct && node.dataset.choice === chosen) node.classList.add("incorrect");
+        }
+      }
+    }
+    const badge = document.getElementById(`mcqBadge_${item.id}`);
+    badge.textContent = chosen ? `Bạn: ${chosen} • ĐA: ${correct}` : "Chưa chọn";
+  }
+
+  // TF grading
+  for(const t of DATA.tf){
+    const keys = DATA.meta.tfKey[t.id];
+    for(let i=0;i<4;i++){
+      const k = `q${t.id}_${i}`;
+      const v = state.tf[k];
+      const correct = keys[i];
+      if(v !== true && v !== false){ na++; continue; }
+      if(v === correct) ok++; else bad++;
+      if(reveal){
+        const pick = document.getElementById(`tfPick_${k}`);
+        if(pick){
+          pick.classList.remove("text-green-700","text-red-700");
+          pick.classList.add(v===correct ? "text-green-700" : "text-red-700");
+          pick.textContent = (v ? "Đúng" : "Sai") + ` • ĐA: ${correct ? "Đúng" : "Sai"}`;
+        }
+      }
+    }
+    updateTFBadge(t.id);
+  }
+
+  // Short grading
+  for(const s of DATA.short){
+    const v = state.short[s.id] ?? "";
+    const correct = DATA.meta.shortKey[s.id];
+    if(normShort(v)===""){ na++; continue; }
+    if(isShortCorrect(s.id, v)) ok++; else bad++;
+
+    const badge = document.getElementById(`shortBadge_${s.id}`);
+    badge.textContent = `Bạn: ${normShort(v)} • ĐA: ${normShort(correct)}`;
+  }
+
+  const totals = computeTotals();
+  const scorePct = Math.round((ok / totals.total) * 1000) / 10; // one decimal
+  els.okBox.textContent = ok;
+  els.badBox.textContent = bad;
+  els.naBox.textContent = na;
+  els.scoreText.textContent = `${scorePct}%`;
+  return {ok,bad,na,scorePct,total:totals.total};
+}
+
+function revealAnswers(){
+  // Fill empty with correct (but don't overwrite user's, just show styling)
+  grade(true);
+  // also mark correct options even if unanswered
+  for(const item of DATA.mcq){
+    const correct = DATA.meta.mcqKey[item.id];
+    const root = document.getElementById(`mcqOpts_${item.id}`);
+    if(root){
+      for(const node of root.querySelectorAll(".opt")){
+        if(node.dataset.choice === correct) node.classList.add("correct");
+      }
+    }
+  }
+}
+
+function resetAll(){
+  if(!confirm("Bạn chắc chắn muốn làm lại? (sẽ xoá bài làm đã lưu)")) return;
+  state = { mcq:{}, tf:{}, short:{} };
+  saveState();
+  renderAll();
+  els.okBox.textContent = "—";
+  els.badBox.textContent = "—";
+  els.naBox.textContent = "—";
+  els.scoreText.textContent = "—";
+}
+
+function updateProgress(){
+  const totals = computeTotals();
+  const done = computeDone();
+  els.totalText.textContent = totals.total;
+  els.doneText.textContent = done;
+  const pct = totals.total ? Math.round((done / totals.total) * 100) : 0;
+  els.progressText.textContent = `${pct}%`;
+}
+
+function renderAll(){
+  renderMCQ();
+  renderTF();
+  renderShort();
+  // Update badges
+  for(const item of DATA.mcq){ updateMCQSelection(item.id); }
+  updateProgress();
+}
+
+els.btnCheck.addEventListener("click", ()=> grade(false));
+els.btnReveal.addEventListener("click", ()=> revealAnswers());
+els.btnReset.addEventListener("click", ()=> resetAll());
+els.btnPrint.addEventListener("click", ()=> window.print());
+
+renderAll();
+updateProgress();
+</script>
+</body>
+</html>
+"""
+out_path = Path("/mnt/data/bai_kiem_tra_HKI_Hoa12_CTST_tuong_tac.html")
+out_path.write_text(html, encoding="utf-8")
+str(out_path)
