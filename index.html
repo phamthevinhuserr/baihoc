@@ -1,133 +1,129 @@
-from pathlib import Path, PurePosixPath
-
-html = r"""<!doctype html>
+<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bài kiểm tra HKI Hóa 12 (CTST) — Tương tác</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Luyện tập Hóa 12 (CTST) - Tối ưu</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { color-scheme: light; }
-    .card { border: 1px solid rgba(0,0,0,.08); border-radius: 18px; background: #fff; }
-    .opt { border: 1px solid rgba(0,0,0,.12); border-radius: 14px; padding: 10px 12px; cursor: pointer; user-select:none;}
-    .opt:hover { background: rgba(59,130,246,.06); }
-    .opt[data-selected="true"] { border-color: rgba(59,130,246,.7); background: rgba(59,130,246,.08); }
-    .opt.correct { border-color: rgba(34,197,94,.9); background: rgba(34,197,94,.10); }
-    .opt.incorrect { border-color: rgba(239,68,68,.9); background: rgba(239,68,68,.10); }
-    .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12); }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; padding: 1px 6px; border-radius: 8px; border: 1px solid rgba(0,0,0,.12); background: rgba(0,0,0,.03); }
-    .stickybar { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); background: rgba(255,255,255,.82); border-bottom: 1px solid rgba(0,0,0,.08); }
-    .muted { color: rgba(0,0,0,.60); }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-    @media print{
-      .no-print { display: none !important; }
-      body { background: white; }
-      .card { break-inside: avoid; }
+    :root {
+      --bg-body: #0f172a; --bg-card: #1e293b; --text-main: #f1f5f9;
+      --text-muted: #94a3b8; --accent: #3b82f6; --border: #334155;
+      --correct: #22c55e; --incorrect: #ef4444;
     }
+    body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Segoe UI', system-ui, sans-serif; }
+    
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    
+    /* Menu Buttons */
+    .menu-btn {
+      width: 100%; padding: 20px; text-align: left; margin-bottom: 12px;
+      border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,0.03);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+    }
+    .menu-btn:hover { background: rgba(59, 130, 246, 0.1); border-color: var(--accent); transform: translateX(4px); }
+    
+    /* Quiz Options */
+    .opt-btn {
+      width: 100%; padding: 16px; margin-bottom: 10px; text-align: left;
+      border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,0.03);
+      transition: all 0.2s; display: flex; gap: 12px; align-items: center; cursor: pointer;
+    }
+    .opt-btn:hover:not(:disabled) { background: rgba(255,255,255,0.05); }
+    
+    /* State Colors */
+    .opt-correct { background: rgba(34, 197, 94, 0.2) !important; border-color: var(--correct) !important; }
+    .opt-incorrect { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--incorrect) !important; }
+    
+    .btn-action {
+      background: var(--accent); color: white; padding: 12px 24px; border-radius: 99px; font-weight: 600;
+      transition: opacity 0.2s; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-action:hover { opacity: 0.9; }
+    .btn-nav { background: var(--bg-card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; font-size: 14px; color: var(--text-muted); transition: 0.2s; }
+    .btn-nav:hover { background: var(--border); color: white; }
+
+    .hidden { display: none !important; }
+    input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    
+    .progress-bar { height: 4px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: 8px;}
+    .progress-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-  <div class="stickybar no-print">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center gap-2 justify-between">
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold">H12</div>
-        <div>
-          <div class="font-semibold leading-tight">Bài kiểm tra HKI Hóa 12 (CTST) — Tương tác</div>
-          <div class="text-sm muted">Gồm: 80 câu ABCD • 8 câu Đúng/Sai • 12 câu trả lời ngắn</div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+  <div id="menuScreen" class="w-full max-w-md fade-in">
+    <div class="text-center mb-8">
+      <div class="inline-block p-3 rounded-full bg-blue-500/10 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-white mb-2">Luyện tập Hóa 12</h1>
+      <p class="text-slate-400">Dữ liệu chuẩn CTST - HKI</p>
+    </div>
+    
+    <button onclick="startSection('mcq')" class="menu-btn group">
+      <div>
+        <div class="font-bold text-lg text-white">Phần I: Trắc nghiệm</div>
+        <div class="text-sm text-slate-400 group-hover:text-blue-300">80 câu hỏi ABCD</div>
+      </div>
+      <span class="text-2xl text-slate-600 group-hover:text-blue-400">➔</span>
+    </button>
+    
+    <button onclick="startSection('tf')" class="menu-btn group">
+      <div>
+        <div class="font-bold text-lg text-white">Phần II: Đúng / Sai</div>
+        <div class="text-sm text-slate-400 group-hover:text-blue-300">8 câu hỏi chùm (32 ý)</div>
+      </div>
+      <span class="text-2xl text-slate-600 group-hover:text-blue-400">➔</span>
+    </button>
+
+    <button onclick="startSection('short')" class="menu-btn group">
+      <div>
+        <div class="font-bold text-lg text-white">Phần III: Trả lời ngắn</div>
+        <div class="text-sm text-slate-400 group-hover:text-blue-300">12 câu hỏi điền số</div>
+      </div>
+      <span class="text-2xl text-slate-600 group-hover:text-blue-400">➔</span>
+    </button>
+  </div>
+
+  <div id="quizScreen" class="w-full max-w-2xl hidden fade-in">
+    <div class="flex items-center justify-between mb-4">
+      <button onclick="goHome()" class="btn-nav">← Menu</button>
+      <div class="text-right flex-1 ml-4">
+        <div class="flex justify-between items-end">
+          <div class="text-xs text-slate-400 uppercase tracking-wide font-bold" id="lblSection">Phần thi</div>
+          <div class="font-bold text-lg"><span id="lblIndex" class="text-blue-400">1</span><span class="text-slate-600 mx-1">/</span><span id="lblTotal" class="text-slate-500">10</span></div>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill" style="width: 0%"></div>
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        <button id="btnCheck" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow">Chấm điểm</button>
-        <button id="btnReveal" class="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow">Hiện đáp án</button>
-        <button id="btnReset" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 border shadow-sm">Làm lại</button>
-        <button id="btnPrint" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 border shadow-sm">In</button>
-      </div>
     </div>
-    <div class="max-w-6xl mx-auto px-4 pb-3">
-      <div class="flex flex-wrap items-center gap-2 text-sm">
-        <span class="badge">Tiến độ: <span id="progressText" class="font-semibold">0%</span></span>
-        <span class="badge">Đã làm: <span id="doneText" class="font-semibold">0</span></span>
-        <span class="badge">Tổng: <span id="totalText" class="font-semibold">0</span></span>
-        <span class="badge">Điểm: <span id="scoreText" class="font-semibold">—</span></span>
-        <span class="muted ml-2">Mẹo: chọn đáp án • cuộn nhanh bằng <span class="kbd">Ctrl</span> + <span class="kbd">F</span> (tìm “Câu 57”)</span>
+
+    <div class="card p-6 min-h-[300px] flex flex-col justify-between">
+      <div id="questionContainer" class="flex-1">
+        </div>
+      
+      <div class="flex justify-end mt-6 pt-4 border-t border-slate-700">
+        <button id="btnNext" onclick="nextQuestion()" class="btn-action hidden">
+          Câu tiếp theo
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 
-  <main class="max-w-6xl mx-auto px-4 py-6 space-y-8">
-    <section class="card p-5">
-      <div class="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 class="text-xl font-bold">Thông tin & cách làm</h2>
-          <p class="muted mt-1">Bài này dựng từ đề cương HKI Hóa 12 CTST. Một số câu có hình/kí hiệu (PS, PVC, sơ đồ lưu hóa) bạn đối chiếu trong PDF gốc nếu cần.</p>
-        </div>
-        <div class="text-sm muted">
-          <div><span class="mono">Lưu tự động</span>: trình duyệt sẽ lưu bài làm (localStorage).</div>
-          <div><span class="mono">Chấm điểm</span>: tính theo số câu đúng / tổng câu.</div>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
-        <h2 class="text-2xl font-bold">PHẦN I — Trắc nghiệm ABCD (80 câu)</h2>
-        <div class="text-sm muted">Mỗi câu chọn 1 đáp án.</div>
-      </div>
-      <div id="mcqRoot" class="space-y-4"></div>
-    </section>
-
-    <section>
-      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
-        <h2 class="text-2xl font-bold">PHẦN II — Đúng / Sai (8 câu)</h2>
-        <div class="text-sm muted">Mỗi ý a–d chọn Đúng hoặc Sai.</div>
-      </div>
-      <div id="tfRoot" class="space-y-4"></div>
-    </section>
-
-    <section>
-      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
-        <h2 class="text-2xl font-bold">PHẦN III — Trả lời ngắn (12 câu)</h2>
-        <div class="text-sm muted">Nhập đáp án (số). Dùng dấu phẩy hoặc dấu chấm đều được cho phần thập phân.</div>
-      </div>
-      <div id="shortRoot" class="space-y-4"></div>
-    </section>
-
-    <section class="card p-5">
-      <h2 class="text-xl font-bold">Kết quả</h2>
-      <div class="grid md:grid-cols-3 gap-3 mt-3">
-        <div class="p-4 rounded-2xl bg-slate-50 border">
-          <div class="muted text-sm">Đúng</div>
-          <div id="okBox" class="text-3xl font-bold">—</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-slate-50 border">
-          <div class="muted text-sm">Sai</div>
-          <div id="badBox" class="text-3xl font-bold">—</div>
-        </div>
-        <div class="p-4 rounded-2xl bg-slate-50 border">
-          <div class="muted text-sm">Chưa làm</div>
-          <div id="naBox" class="text-3xl font-bold">—</div>
-        </div>
-      </div>
-      <p class="muted mt-3 text-sm">Lưu ý: điểm ở đây chỉ là điểm luyện tập (tính theo % đúng).</p>
-    </section>
-
-    <footer class="muted text-sm pb-10">
-      <div>© Bạn có thể sửa đề/đáp án trong biến <span class="mono">DATA</span> (ở cuối file).</div>
-    </footer>
-  </main>
-
 <script>
-/** =========================
- *  DATA (Questions + Answers)
- *  =========================
- *  Đề bám theo file PDF đề cương HKI Hóa 12 CTST.
- *  Một số câu có hình trong PDF, mình ghi chú "xem PDF".
- */
+/* DATA (Đã kiểm tra khớp 100% với yêu cầu) */
 const DATA = {
   meta: {
-    title: "HKI Hóa 12 (CTST)",
-    // Answer keys user chốt
     mcqKey: {
       1:"C",2:"A",3:"D",4:"B",5:"C",6:"D",7:"A",8:"C",9:"C",10:"A",
       11:"C",12:"B",13:"B",14:"B",15:"C",16:"B",17:"C",18:"D",19:"D",20:"B",
@@ -138,22 +134,15 @@ const DATA = {
       61:"D",62:"A",63:"D",64:"A",65:"C",66:"C",67:"D",68:"B",69:"A",70:"D",
       71:"C",72:"A",73:"A",74:"A",75:"B",76:"A",77:"A",78:"C",79:"B",80:"C"
     },
-    // TF keys: each q has 4 booleans a-d. true = Đúng, false = Sai
     tfKey: {
-      1: [true,false,true,false],
-      2: [true,true,false,true],
-      3: [true,true,true,true], // user chốt b là đúng theo CTST
-      4: [false,true,false,true],
-      5: [true,false,true,true],
-      6: [false,true,true,true],
-      7: [false,true,true,true],
-      8: [true,true,false,true]
+      1: [true,false,true,false], 2: [true,true,false,true], 3: [true,true,true,true],
+      4: [false,true,false,true], 5: [true,false,true,true], 6: [false,true,true,true],
+      7: [false,true,true,true], 8: [true,true,false,true]
     },
     shortKey: {
       1:"4",2:"4",3:"2",4:"4",5:"2",6:"4",7:"4",8:"4",9:"12",10:"4",11:"0,34",12:"0,94"
     }
   },
-
   mcq: [
     {id:1, q:"Ester methyl acrylate có công thức là", opts:{A:"CH3COOCH3",B:"CH3COOCH=CH2",C:"CH2=CHCOOCH3",D:"HCOOCH3"}},
     {id:2, q:"Ester nào sau đây tác dụng với dung dịch NaOH thu được sodium acetate?", opts:{A:"CH3COOC2H5",B:"C2H5COOCH3",C:"HCOOCH3",D:"HCOOC2H5"}},
@@ -165,7 +154,6 @@ const DATA = {
     {id:8, q:"Phát biểu nào sau đây không đúng khi nói về glucose và fructose?", opts:{A:"Đều tạo được dung dịch màu xanh lam khi tác dụng với Cu(OH)2 trong môi trường kiềm.",B:"Đều tạo kết tủa đỏ gạch Cu2O khi tác dụng với Cu(OH)2, đun nóng trong môi trường kiềm.",C:"Đều làm mất màu nước bromine.",D:"Đều xảy ra phản ứng tráng bạc với thuốc thử Tollens."}},
     {id:9, q:"Saccharose tham gia phản ứng nào sau đây?", opts:{A:"Phản ứng với thuốc thử Tollens.",B:"Phản ứng với nước bromine.",C:"Phản ứng với Cu(OH)2 tạo dung dịch màu xanh lam.",D:"Phản ứng thuỷ phân trong môi trường kiềm."}},
     {id:10, q:"Chất X tạo thành trong cây xanh nhờ quang hợp. Thủy phân hoàn toàn X (xúc tác acid) thu được Y. Y có nhiều trong quả nho chín (đường nho). X và Y lần lượt là", opts:{A:"tinh bột và glucose",B:"cellulose và saccharose",C:"cellulose và fructose",D:"tinh bột và saccharose"}},
-
     {id:11, q:"Chất nào sau đây là amine?", opts:{A:"CH3OH",B:"H2NCH2COOH",C:"CH3NH2",D:"HCOOH"}},
     {id:12, q:"Khi thay thế nguyên tử hydrogen trong ammonia bằng gốc hydrocarbon thu được", opts:{A:"Carbohydrate",B:"Amine",C:"Ester",D:"Carboxylic acid"}},
     {id:13, q:"Công thức phân tử của dimethylamine là", opts:{A:"C2H8N2",B:"C2H7N",C:"C4H11N",D:"CH6N2"}},
@@ -176,7 +164,6 @@ const DATA = {
     {id:18, q:"Trong phản ứng với nước bromine, aniline thể hiện phản ứng", opts:{A:"cộng halogen vào nhóm -NH2",B:"thế halogen vào nhóm -NH2",C:"cộng halogen vào vòng benzene",D:"thế hydrogen trên vòng benzene"}},
     {id:19, q:"Amine không được ứng dụng trong lĩnh vực nào?", opts:{A:"Dược phẩm",B:"Phẩm nhuộm",C:"Công nghiệp polymer",D:"Công nghiệp silicate"}},
     {id:20, q:"Khử mùi tanh của cá (do amine) trước chế biến nên", opts:{A:"Ngâm trong nước",B:"Rửa bằng giấm ăn",C:"Rửa bằng dung dịch soda",D:"Rửa bằng nước muối"}},
-
     {id:21, q:"Bảng thí nghiệm: X làm quỳ tím hóa xanh; Y tạo Ag với AgNO3/NH3; Z tạo kết tủa trắng với nước bromine. X,Y,Z lần lượt là", opts:{A:"Aniline, glucose, ethylamine",B:"Ethylamine, glucose, aniline",C:"Ethylamine, aniline, glucose",D:"Glucose, ethylamine, aniline"}},
     {id:22, q:"Chất nào sau đây là amino acid?", opts:{A:"HOCH2COOH",B:"CH3COOH",C:"CH3NH2",D:"H2NCH2COOH"}},
     {id:23, q:"Hợp chất H2NCH2COOH có tên là", opts:{A:"valine",B:"lysine",C:"alanine",D:"glycine"}},
@@ -187,7 +174,6 @@ const DATA = {
     {id:28, q:"Peptide được tạo thành từ", opts:{A:"đơn vị glucose",B:"acid béo",C:"đơn vị α-amino acid",D:"đơn vị hydrocarbon"}},
     {id:29, q:"Nhóm peptide có cấu tạo là", opts:{A:"-CO-NH2",B:"-CO-NH-",C:"-COOH",D:"-CO-"}},
     {id:30, q:"Chất nào là một dipeptide?", opts:{A:"Gly-Ala",B:"Gly-Ala-Val",C:"Gly-Gly-Ala-Val",D:"Val"}},
-
     {id:31, q:"Số liên kết peptide trong Gly-Ala-Phe-Gly là", opts:{A:"3",B:"4",C:"2",D:"1"}},
     {id:32, q:"Nhận biết peptide (trừ dipeptide) dùng", opts:{A:"màu với iodine",B:"màu biuret",C:"Tollens",D:"Fehling"}},
     {id:33, q:"Peptide có từ hai liên kết peptide trở lên phản ứng biuret cho màu", opts:{A:"vàng",B:"xanh",C:"đỏ",D:"tím"}},
@@ -198,7 +184,6 @@ const DATA = {
     {id:38, q:"Phát biểu nào sau đây là không đúng?", opts:{A:"Đun nóng lòng trắng trứng: lỏng → rắn.",B:"Protein là chuỗi polypeptide từ nhiều α-amino acid.",C:"Albumin lòng trắng trứng là protein hình sợi và không tan trong nước.",D:"Nhỏ HNO3 vào lòng trắng trứng, màu chuyển vàng."}},
     {id:39, q:"Trong nghiên cứu hóa học, enzyme đóng vai trò", opts:{A:"định lượng/định tính/chẩn đoán xét nghiệm",B:"sản xuất phân bón vi sinh",C:"xúc tác cho phản ứng",D:"chế biến thực phẩm"}},
     {id:40, q:"Khi nấu canh cua/tôm/tép thấy mảng thịt đóng rắn lại do", opts:{A:"đông tụ do thay đổi pH",B:"đông tụ do nhiệt độ",C:"kết tủa carbonate khoáng",D:"thủy phân protein do nhiệt"}},
-
     {id:41, q:"Polymer là hợp chất hữu cơ có phân tử khối ...(1)... do nhiều ...(2)... liên kết tạo nên.", opts:{A:"(1) lớn; (2) chất",B:"(1) lớn; (2) mắt xích",C:"(1) nhỏ; (2) mắt xích",D:"(1) nhỏ; (2) chất"}},
     {id:42, q:"Polymer nào sau đây thuộc polymer thiên nhiên?", opts:{A:"Polystyrene",B:"Polypropylene",C:"Tinh bột",D:"Polyethylene"}},
     {id:43, q:"Polymer nào chỉ có 2 nguyên tố C và H?", opts:{A:"Poly(methyl methacrylate)",B:"Poly(vinyl chloride)",C:"Poly(phenol formaldehyde)",D:"Polystyrene"}},
@@ -209,7 +194,6 @@ const DATA = {
     {id:48, q:"Poly(vinyl acetate) bị thủy phân trong môi trường kiềm. Phản ứng thuộc loại", opts:{A:"cắt mạch polymer",B:"giữ nguyên mạch polymer",C:"tăng mạch polymer",D:"phân huỷ polymer"}},
     {id:49, q:"Kết hợp nhiều monomer tạo polymer và giải phóng phân tử nhỏ (thường H2O) gọi là", opts:{A:"trùng hợp",B:"thế",C:"tách",D:"trùng ngưng"}},
     {id:50, q:"Chất nào có thể tham gia phản ứng trùng ngưng?", opts:{A:"C6H6",B:"H2N[CH2]6COOH",C:"C6H5CH=CH2",D:"CH2=CHCH3"}},
-
     {id:51, q:"Monomer trùng hợp tạo PMMA là", opts:{A:"CH2=C(CH3)COOCH3",B:"CH2=CHCOOCH3",C:"CH2=CHC6H5",D:"CH2=CHCl"}},
     {id:52, q:"PP được tổng hợp từ monomer", opts:{A:"CH2=CH2",B:"CH2=CHCN",C:"CH3CH=CH2",D:"C6H5OH và HCHO"}},
     {id:53, q:"Monomer tạo các polymer: (CH2-CH2)n ; (CH2=CH-CH=CH2)n ; (HN[CH2]5CO)n lần lượt là", opts:{A:"CH2=CH2; CH3-CH=CH-CH3; H2N-CH2-CH2-COOH",B:"CH2=CHCl; CH3-CH=CH-CH3; H2N-CH(NH2)-COOH",C:"CH2=CH2; CH2=CH-CH=CH2; H2N-[CH2]5-COOH",D:"CH2=CH2; CH3-CH=C=CH2; H2N-[CH2]5-COOH"}},
@@ -220,7 +204,6 @@ const DATA = {
     {id:58, q:"Biện pháp nào không làm giảm rác thải nhựa?", opts:{A:"tái chế/tái sử dụng",B:"khuyến khích sử dụng túi nylon",C:"mang theo túi khi mua sắm",D:"dùng vật liệu phân hủy sinh học"}},
     {id:59, q:"Tơ là vật liệu polymer", opts:{A:"có tính đàn hồi",B:"dạng sợi và không thấm nước",C:"có tính dẻo",D:"dạng sợi mảnh và độ bền nhất định"}},
     {id:60, q:"Tơ tằm, sợi bông, len thuộc loại", opts:{A:"tơ tự nhiên",B:"tơ tổng hợp",C:"tơ bán tổng hợp",D:"tơ nhân tạo"}},
-
     {id:61, q:"Nylon-6,6 thuộc loại tơ", opts:{A:"tơ polyester",B:"tơ bán tổng hợp",C:"tơ thiên nhiên",D:"tơ tổng hợp"}},
     {id:62, q:"Tơ nào thuộc loại polymer tổng hợp?", opts:{A:"Poly(vinyl chloride)",B:"Tinh bột",C:"Tơ visco",D:"Tơ tằm"}},
     {id:63, q:"Trùng hợp chất nào thu được cao su buna?", opts:{A:"CH2=C(CH3)–CH=CH2",B:"CH3–CH=C=CH2",C:"CH3–CH(Cl)–CH=CH2",D:"CH2=CH–CH=CH2"}},
@@ -231,7 +214,6 @@ const DATA = {
     {id:68, q:"Cao su tự nhiên chứa mắt xích của", opts:{A:"Styrene",B:"Isoprene",C:"Ethylene",D:"Buta-1,3-diene"}},
     {id:69, q:"Keo dán là vật liệu polymer có", opts:{A:"khả năng kết dính hai mảnh vật liệu rắn với nhau mà không làm thay đổi vật liệu kết dính",B:"khả năng tạo liên kết H giữa các vật liệu",C:"thành phần gồm vật liệu cốt và nền là chất kết dính",D:"khả năng kết dính khi thêm chất đóng rắn"}},
     {id:70, q:"Keo dùng để vá săm/lốp xe là", opts:{A:"keo epoxy",B:"keo 502",C:"keo poly(ure-formaldehyde)",D:"nhựa vá săm"}},
-
     {id:71, q:"Đâu không phải là một loại keo dán tổng hợp?", opts:{A:"Nhựa vá săm",B:"Keo epoxy",C:"Cao su lưu hóa",D:"Keo poly(ure-formaldehyde)"}},
     {id:72, q:"Cho (a)-(e) về PS, tơ tằm, đốt nhựa, cao su lưu hóa, vai trò vật liệu nền composite. Số phát biểu đúng là", opts:{A:"4",B:"3",C:"2",D:"5"}},
     {id:73, q:"Phát biểu nào không đúng về pin Galvani?", opts:{A:"Ở điện cực dương xảy ra oxi hoá",B:"Cathode là kim loại yếu hơn, là điện cực dương",C:"Anode là kim loại mạnh hơn, là điện cực âm",D:"Phản ứng hóa học kèm giải phóng điện năng"}},
@@ -243,7 +225,6 @@ const DATA = {
     {id:79, q:"E°(Ag+/Ag)=0,80; E°(Hg2+/Hg)=0,85. Phản ứng nào xảy ra được?", opts:{A:"Hg + Ag → Hg2+ + Ag",B:"Hg2+ + Ag → Hg + Ag+",C:"Hg2+ + Ag+ → Hg + Ag",D:"Hg + Ag → Hg2+ + Ag+"}},
     {id:80, q:"E°: Fe2+/Fe=-0,44; Na+/Na=-2,713; Ag+/Ag=+0,799; Mg2+/Mg=-2,353; Cu2+/Cu=+0,340. Ở ĐK chuẩn, Cu khử được ion nào?", opts:{A:"Na+",B:"Mg2+",C:"Ag+",D:"Fe2+"}}
   ],
-
   tf: [
     {id:1, stem:"Amine là dẫn xuất của ammonia...", items:[
       "Thành phần nguyên tố có trong phân tử amine là C, H và N.",
@@ -294,7 +275,6 @@ const DATA = {
       "Hộp bã mía là polymer thiên nhiên; hộp xốp là polymer tổng hợp."
     ]}
   ],
-
   short: [
     {id:1, q:"Trong phân tử peptide cho dưới đây có bao nhiêu liên kết peptide? (xem hình trong PDF)"},
     {id:2, q:"Trong phân tử peptide cho dưới đây có bao nhiêu liên kết peptide? (xem hình trong PDF)"},
@@ -311,342 +291,208 @@ const DATA = {
   ]
 };
 
-/** =========================
- *  RENDERING
- *  ========================= */
-const els = {
-  mcqRoot: document.getElementById("mcqRoot"),
-  tfRoot: document.getElementById("tfRoot"),
-  shortRoot: document.getElementById("shortRoot"),
-  progressText: document.getElementById("progressText"),
-  doneText: document.getElementById("doneText"),
-  totalText: document.getElementById("totalText"),
-  scoreText: document.getElementById("scoreText"),
-  okBox: document.getElementById("okBox"),
-  badBox: document.getElementById("badBox"),
-  naBox: document.getElementById("naBox"),
-  btnCheck: document.getElementById("btnCheck"),
-  btnReset: document.getElementById("btnReset"),
-  btnReveal: document.getElementById("btnReveal"),
-  btnPrint: document.getElementById("btnPrint"),
+/* LOGIC CHƯƠNG TRÌNH */
+let appState = {
+  section: null,
+  list: [],
+  idx: 0
 };
 
-const STORE_KEY = "hoa12_ctst_hki_quiz_v1";
-let state = loadState() || { mcq:{}, tf:{}, short:{} };
+const els = {
+  menu: document.getElementById('menuScreen'),
+  quiz: document.getElementById('quizScreen'),
+  lblSection: document.getElementById('lblSection'),
+  lblIndex: document.getElementById('lblIndex'),
+  lblTotal: document.getElementById('lblTotal'),
+  container: document.getElementById('questionContainer'),
+  btnNext: document.getElementById('btnNext'),
+  prog: document.getElementById('progressFill')
+};
 
-function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
-function loadState(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)); }catch(e){ return null; } }
-
-function normShort(s){
-  if(s == null) return "";
-  return String(s).trim().replace(/\s+/g," ").replace(".", ","); // allow dot => comma
+function goHome() {
+  els.quiz.classList.add('hidden');
+  els.menu.classList.remove('hidden');
 }
-function isShortCorrect(id, userVal){
-  const key = normShort(DATA.meta.shortKey[id]);
-  const v = normShort(userVal);
-  return v !== "" && v === key;
+
+function startSection(type) {
+  appState.section = type;
+  appState.idx = 0;
+  
+  if (type === 'mcq') {
+    appState.list = DATA.mcq;
+    els.lblSection.textContent = "Phần I: Trắc nghiệm ABCD";
+  } else if (type === 'tf') {
+    appState.list = DATA.tf;
+    els.lblSection.textContent = "Phần II: Đúng / Sai";
+  } else {
+    appState.list = DATA.short;
+    els.lblSection.textContent = "Phần III: Trả lời ngắn";
+  }
+  
+  els.lblTotal.textContent = appState.list.length;
+  updateProgress();
+  
+  els.menu.classList.add('hidden');
+  els.quiz.classList.remove('hidden');
+  renderQuestion();
 }
 
-function renderMCQ(){
-  els.mcqRoot.innerHTML = "";
-  for(const item of DATA.mcq){
-    const chosen = state.mcq[item.id] || "";
-    const card = document.createElement("div");
-    card.className = "card p-5";
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-sm muted">Câu ${item.id}</div>
-          <div class="text-base font-semibold mt-0.5">${escapeHTML(item.q)}</div>
-        </div>
-        <div class="badge" id="mcqBadge_${item.id}">—</div>
-      </div>
-      <div class="grid md:grid-cols-2 gap-2 mt-4" id="mcqOpts_${item.id}"></div>
-    `;
-    const optsRoot = card.querySelector(`#mcqOpts_${item.id}`);
-    for(const k of ["A","B","C","D"]){
-      const div = document.createElement("div");
-      div.className = "opt";
-      div.setAttribute("role", "button");
-      div.dataset.qid = item.id;
-      div.dataset.choice = k;
-      div.dataset.selected = (chosen === k) ? "true" : "false";
-      div.innerHTML = `<span class="font-semibold">${k}.</span> <span>${escapeHTML(item.opts[k])}</span>`;
-      div.addEventListener("click", () => {
-        state.mcq[item.id] = k;
-        saveState();
-        updateMCQSelection(item.id);
-        updateProgress();
-      });
-      optsRoot.appendChild(div);
+function updateProgress() {
+  const pct = ((appState.idx) / appState.list.length) * 100;
+  els.prog.style.width = `${pct}%`;
+}
+
+function nextQuestion() {
+  if (appState.idx < appState.list.length - 1) {
+    appState.idx++;
+    updateProgress();
+    renderQuestion();
+  } else {
+    if(confirm("Đã hết câu hỏi! Bạn có muốn quay lại Menu không?")) {
+      goHome();
     }
-    els.mcqRoot.appendChild(card);
   }
 }
 
-function updateMCQSelection(id){
-  const root = document.getElementById(`mcqOpts_${id}`);
-  if(!root) return;
-  const chosen = state.mcq[id] || "";
-  for(const node of root.querySelectorAll(".opt")){
-    node.dataset.selected = (node.dataset.choice === chosen) ? "true" : "false";
-  }
-  const badge = document.getElementById(`mcqBadge_${id}`);
-  badge.textContent = chosen ? `Đã chọn: ${chosen}` : "Chưa chọn";
-}
+function renderQuestion() {
+  const item = appState.list[appState.idx];
+  els.lblIndex.textContent = appState.idx + 1;
+  els.btnNext.classList.add('hidden'); 
+  
+  els.container.innerHTML = "";
+  els.container.classList.remove('fade-in');
+  void els.container.offsetWidth; 
+  els.container.classList.add('fade-in');
 
-function renderTF(){
-  els.tfRoot.innerHTML = "";
-  for(const t of DATA.tf){
-    const card = document.createElement("div");
-    card.className = "card p-5";
-    const rows = t.items.map((txt, idx) => {
-      const key = `q${t.id}_${idx}`;
-      const val = state.tf[key]; // true/false/undefined
-      return `
-        <div class="p-3 rounded-2xl border bg-slate-50">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="font-semibold">Ý ${String.fromCharCode(97+idx)})</div>
-            <div class="flex gap-2">
-              <button class="tfbtn px-3 py-1.5 rounded-xl border bg-white hover:bg-slate-100" data-k="${key}" data-v="true">Đúng</button>
-              <button class="tfbtn px-3 py-1.5 rounded-xl border bg-white hover:bg-slate-100" data-k="${key}" data-v="false">Sai</button>
-            </div>
+  let html = `<h2 class="text-xl font-bold mb-4">Câu ${item.id}: <span class="font-normal text-slate-300">${escapeHTML(item.q || item.stem)}</span></h2>`;
+
+  // MCQ
+  if (appState.section === 'mcq') {
+    const correctKey = DATA.meta.mcqKey[item.id];
+    html += `<div class="space-y-3">`;
+    for(const k of ['A','B','C','D']) {
+      html += `
+      <button class="opt-btn group w-full" id="opt_${k}" onclick="checkMCQ('${k}', '${correctKey}')">
+        <span class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-700 text-blue-400 font-bold group-hover:bg-slate-600 transition-colors">${k}</span> 
+        <span class="flex-1">${escapeHTML(item.opts[k])}</span>
+        <span class="font-bold icon-status hidden text-xl"></span>
+      </button>`;
+    }
+    html += `</div>`;
+    els.container.innerHTML = html;
+  }
+  
+  // TF
+  else if (appState.section === 'tf') {
+    const correctArr = DATA.meta.tfKey[item.id];
+    html += `<div class="space-y-4">`;
+    item.items.forEach((subQ, i) => {
+      const isTrue = correctArr[i];
+      html += `
+        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+          <div class="mb-3 text-slate-200">${escapeHTML(subQ)}</div>
+          <div class="flex gap-3" id="tf_row_${i}">
+            <button class="flex-1 py-2 rounded-lg border border-slate-600 hover:bg-slate-800 transition font-semibold"
+               onclick="checkTF(${i}, true, ${isTrue})">Đúng</button>
+            <button class="flex-1 py-2 rounded-lg border border-slate-600 hover:bg-slate-800 transition font-semibold"
+               onclick="checkTF(${i}, false, ${isTrue})">Sai</button>
           </div>
-          <div class="mt-2">${escapeHTML(txt)}</div>
-          <div class="mt-2 text-sm muted">Bạn chọn: <span id="tfPick_${key}" class="font-semibold">${val===true?"Đúng":val===false?"Sai":"—"}</span></div>
-        </div>
-      `;
-    }).join("");
-
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-sm muted">Câu ${t.id}</div>
-          <div class="text-base font-semibold mt-0.5">${escapeHTML(t.stem)}</div>
-        </div>
-        <div class="badge" id="tfBadge_${t.id}">—</div>
-      </div>
-      <div class="mt-4 space-y-2">${rows}</div>
-    `;
-
-    card.querySelectorAll(".tfbtn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const k = btn.dataset.k;
-        const v = (btn.dataset.v === "true");
-        state.tf[k] = v;
-        saveState();
-        document.getElementById(`tfPick_${k}`).textContent = v ? "Đúng" : "Sai";
-        updateTFBadge(t.id);
-        updateProgress();
-      });
+          <div id="tf_res_${i}" class="mt-2 text-sm font-bold hidden"></div>
+        </div>`;
     });
+    html += `</div>`;
+    els.container.innerHTML = html;
+    els.btnNext.classList.remove('hidden');
+  }
+  
+  // SHORT
+  else if (appState.section === 'short') {
+    const correctVal = DATA.meta.shortKey[item.id];
+    html += `
+      <div class="mt-6">
+        <label class="block text-slate-400 mb-2 text-sm">Nhập đáp án (dùng dấu phẩy cho số thập phân)</label>
+        <div class="flex gap-2">
+          <input type="text" id="shortInput" class="flex-1 bg-slate-900 border border-slate-600 text-white px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500" placeholder="VD: 4, 12, 0,34..." 
+            onkeydown="if(event.key==='Enter') checkShort('${correctVal}')"/>
+          <button onclick="checkShort('${correctVal}')" class="btn-action bg-blue-600 hover:bg-blue-500 whitespace-nowrap">Kiểm tra</button>
+        </div>
+        <div id="shortResult" class="mt-4 p-4 rounded-xl border hidden text-center"></div>
+      </div>
+    `;
+    els.container.innerHTML = html;
+  }
+  
+  // Auto scroll top when render new question
+  document.querySelector('.card').scrollTop = 0;
+}
 
-    els.tfRoot.appendChild(card);
-    updateTFBadge(t.id);
+/* XỬ LÝ CHECK ĐÁP ÁN */
+
+function checkMCQ(userPick, correctKey) {
+  const buttons = document.querySelectorAll('.opt-btn');
+  buttons.forEach(btn => btn.disabled = true);
+  
+  const correctBtn = document.getElementById(`opt_${correctKey}`);
+  correctBtn.classList.add('opt-correct');
+  correctBtn.querySelector('.icon-status').textContent = "✓";
+  correctBtn.querySelector('.icon-status').classList.remove('hidden');
+
+  if (userPick !== correctKey) {
+    const wrongBtn = document.getElementById(`opt_${userPick}`);
+    wrongBtn.classList.add('opt-incorrect');
+    wrongBtn.querySelector('.icon-status').textContent = "✗";
+    wrongBtn.querySelector('.icon-status').classList.remove('hidden');
+  }
+
+  els.btnNext.classList.remove('hidden');
+}
+
+function checkTF(rowIdx, userVal, correctVal) {
+  const row = document.getElementById(`tf_row_${rowIdx}`);
+  const btns = row.querySelectorAll('button');
+  btns.forEach(b => b.disabled = true);
+
+  const resDiv = document.getElementById(`tf_res_${rowIdx}`);
+  resDiv.classList.remove('hidden');
+
+  if (userVal === correctVal) {
+    btns[userVal ? 0 : 1].classList.add('bg-green-600', 'border-green-500', 'text-white');
+    resDiv.className = "mt-2 text-sm font-bold text-green-400";
+    resDiv.textContent = "Chính xác! ✓";
+  } else {
+    btns[userVal ? 0 : 1].classList.add('bg-red-600', 'border-red-500', 'text-white');
+    btns[correctVal ? 0 : 1].classList.add('ring-2', 'ring-green-500'); // Gợi ý đáp án đúng
+    resDiv.className = "mt-2 text-sm font-bold text-red-400";
+    resDiv.textContent = `Sai rồi! Đáp án là: ${correctVal ? "Đúng" : "Sai"}`;
   }
 }
 
-function updateTFBadge(qid){
-  const badge = document.getElementById(`tfBadge_${qid}`);
-  const keys = [0,1,2,3].map(i=>`q${qid}_${i}`);
-  const done = keys.filter(k=>state.tf[k]===true || state.tf[k]===false).length;
-  badge.textContent = `${done}/4 ý`;
-}
+function checkShort(correctVal) {
+  const input = document.getElementById('shortInput');
+  const resDiv = document.getElementById('shortResult');
+  
+  // Chuẩn hóa input: đổi chấm thành phẩy, xóa khoảng trắng
+  let userVal = input.value.trim().replace(/\./g, ",");
+  let keyVal = String(correctVal).trim().replace(/\./g, ",");
+  
+  if (!userVal) return;
 
-function renderShort(){
-  els.shortRoot.innerHTML = "";
-  for(const s of DATA.short){
-    const val = state.short[s.id] ?? "";
-    const card = document.createElement("div");
-    card.className = "card p-5";
-    card.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <div class="text-sm muted">Câu ${s.id}</div>
-          <div class="text-base font-semibold mt-0.5">${escapeHTML(s.q)}</div>
-        </div>
-        <div class="badge" id="shortBadge_${s.id}">—</div>
-      </div>
-      <div class="mt-4 flex flex-wrap items-center gap-2">
-        <input class="w-56 px-4 py-2 rounded-xl border bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-               placeholder="Nhập đáp án…" value="${escapeAttr(val)}" id="shortInp_${s.id}" />
-        <span class="muted text-sm">Ví dụ: <span class="mono">${escapeHTML(DATA.meta.shortKey[s.id])}</span></span>
-      </div>
-    `;
-    const inp = card.querySelector(`#shortInp_${s.id}`);
-    inp.addEventListener("input", ()=>{
-      state.short[s.id] = inp.value;
-      saveState();
-      updateShortBadge(s.id);
-      updateProgress();
-    });
-    els.shortRoot.appendChild(card);
-    updateShortBadge(s.id);
+  resDiv.classList.remove('hidden', 'bg-green-900/30', 'border-green-500', 'text-green-400', 'bg-red-900/30', 'border-red-500', 'text-red-400');
+  
+  if (userVal === keyVal) {
+    resDiv.classList.add('bg-green-900/30', 'border-green-500', 'text-green-400');
+    resDiv.innerHTML = `<div class="text-xl font-bold mb-1">Chính xác! 🎉</div>`;
+  } else {
+    resDiv.classList.add('bg-red-900/30', 'border-red-500', 'text-red-400');
+    resDiv.innerHTML = `<div class="font-bold mb-1">Chưa đúng</div><div>Đáp án đúng là: <span class="font-bold text-white text-lg">${keyVal}</span></div>`;
   }
+  
+  els.btnNext.classList.remove('hidden');
 }
 
-function updateShortBadge(id){
-  const badge = document.getElementById(`shortBadge_${id}`);
-  const v = normShort(state.short[id] ?? "");
-  badge.textContent = v ? "Đã nhập" : "Chưa nhập";
-}
-
-function escapeHTML(str){
+function escapeHTML(str) {
   return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
 }
-function escapeAttr(str){
-  return escapeHTML(str).replace(/"/g,"&quot;");
-}
-
-function computeTotals(){
-  const totalMcq = DATA.mcq.length;
-  const totalTf = DATA.tf.length * 4;
-  const totalShort = DATA.short.length;
-  return { totalMcq, totalTf, totalShort, total: totalMcq + totalTf + totalShort };
-}
-
-function computeDone(){
-  let done = 0;
-  // mcq
-  for(const item of DATA.mcq){
-    if(state.mcq[item.id]) done++;
-  }
-  // tf
-  for(const t of DATA.tf){
-    for(let i=0;i<4;i++){
-      const k = `q${t.id}_${i}`;
-      if(state.tf[k]===true || state.tf[k]===false) done++;
-    }
-  }
-  // short
-  for(const s of DATA.short){
-    if(normShort(state.short[s.id] ?? "") !== "") done++;
-  }
-  return done;
-}
-
-function grade(reveal=false){
-  let ok=0, bad=0, na=0;
-
-  // reset styles
-  document.querySelectorAll(".opt").forEach(n=>n.classList.remove("correct","incorrect"));
-
-  // MCQ grading
-  for(const item of DATA.mcq){
-    const chosen = state.mcq[item.id];
-    const correct = DATA.meta.mcqKey[item.id];
-    if(!chosen){ na++; continue; }
-    if(chosen === correct) ok++; else bad++;
-
-    if(reveal){
-      const root = document.getElementById(`mcqOpts_${item.id}`);
-      if(root){
-        for(const node of root.querySelectorAll(".opt")){
-          if(node.dataset.choice === correct) node.classList.add("correct");
-          if(chosen !== correct && node.dataset.choice === chosen) node.classList.add("incorrect");
-        }
-      }
-    }
-    const badge = document.getElementById(`mcqBadge_${item.id}`);
-    badge.textContent = chosen ? `Bạn: ${chosen} • ĐA: ${correct}` : "Chưa chọn";
-  }
-
-  // TF grading
-  for(const t of DATA.tf){
-    const keys = DATA.meta.tfKey[t.id];
-    for(let i=0;i<4;i++){
-      const k = `q${t.id}_${i}`;
-      const v = state.tf[k];
-      const correct = keys[i];
-      if(v !== true && v !== false){ na++; continue; }
-      if(v === correct) ok++; else bad++;
-      if(reveal){
-        const pick = document.getElementById(`tfPick_${k}`);
-        if(pick){
-          pick.classList.remove("text-green-700","text-red-700");
-          pick.classList.add(v===correct ? "text-green-700" : "text-red-700");
-          pick.textContent = (v ? "Đúng" : "Sai") + ` • ĐA: ${correct ? "Đúng" : "Sai"}`;
-        }
-      }
-    }
-    updateTFBadge(t.id);
-  }
-
-  // Short grading
-  for(const s of DATA.short){
-    const v = state.short[s.id] ?? "";
-    const correct = DATA.meta.shortKey[s.id];
-    if(normShort(v)===""){ na++; continue; }
-    if(isShortCorrect(s.id, v)) ok++; else bad++;
-
-    const badge = document.getElementById(`shortBadge_${s.id}`);
-    badge.textContent = `Bạn: ${normShort(v)} • ĐA: ${normShort(correct)}`;
-  }
-
-  const totals = computeTotals();
-  const scorePct = Math.round((ok / totals.total) * 1000) / 10; // one decimal
-  els.okBox.textContent = ok;
-  els.badBox.textContent = bad;
-  els.naBox.textContent = na;
-  els.scoreText.textContent = `${scorePct}%`;
-  return {ok,bad,na,scorePct,total:totals.total};
-}
-
-function revealAnswers(){
-  // Fill empty with correct (but don't overwrite user's, just show styling)
-  grade(true);
-  // also mark correct options even if unanswered
-  for(const item of DATA.mcq){
-    const correct = DATA.meta.mcqKey[item.id];
-    const root = document.getElementById(`mcqOpts_${item.id}`);
-    if(root){
-      for(const node of root.querySelectorAll(".opt")){
-        if(node.dataset.choice === correct) node.classList.add("correct");
-      }
-    }
-  }
-}
-
-function resetAll(){
-  if(!confirm("Bạn chắc chắn muốn làm lại? (sẽ xoá bài làm đã lưu)")) return;
-  state = { mcq:{}, tf:{}, short:{} };
-  saveState();
-  renderAll();
-  els.okBox.textContent = "—";
-  els.badBox.textContent = "—";
-  els.naBox.textContent = "—";
-  els.scoreText.textContent = "—";
-}
-
-function updateProgress(){
-  const totals = computeTotals();
-  const done = computeDone();
-  els.totalText.textContent = totals.total;
-  els.doneText.textContent = done;
-  const pct = totals.total ? Math.round((done / totals.total) * 100) : 0;
-  els.progressText.textContent = `${pct}%`;
-}
-
-function renderAll(){
-  renderMCQ();
-  renderTF();
-  renderShort();
-  // Update badges
-  for(const item of DATA.mcq){ updateMCQSelection(item.id); }
-  updateProgress();
-}
-
-els.btnCheck.addEventListener("click", ()=> grade(false));
-els.btnReveal.addEventListener("click", ()=> revealAnswers());
-els.btnReset.addEventListener("click", ()=> resetAll());
-els.btnPrint.addEventListener("click", ()=> window.print());
-
-renderAll();
-updateProgress();
 </script>
 </body>
 </html>
-"""
-out_path = Path("/mnt/data/bai_kiem_tra_HKI_Hoa12_CTST_tuong_tac.html")
-out_path.write_text(html, encoding="utf-8")
-str(out_path)
