@@ -1,407 +1,567 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Luyện thi Sinh học 12 – Ôn tập HKI</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Luyện thi Sinh học 12 – Full Dạng Bài</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Tối ưu tốc độ hiển thị và hiệu ứng */
     :root { color-scheme: dark; }
-    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #020617; color: #f1f5f9; }
     
-    /* Animation nhẹ cho chuyển động mượt mà */
-    .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+    /* Animations */
+    .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-    /* Utility classes cho trạng thái nút */
-    .btn-option { transition: all 0.2s; border: 1px solid #334155; }
-    .btn-option:hover:not(:disabled) { background-color: #334155; border-color: #475569; }
+    /* Buttons */
+    .btn-action { transition: all 0.2s; }
+    .btn-action:active { transform: scale(0.98); }
     
-    /* Màu sắc trạng thái */
-    .correct { background-color: #059669 !important; border-color: #059669 !important; color: white !important; }
-    .wrong { background-color: #e11d48 !important; border-color: #e11d48 !important; color: white !important; }
-    .neutral { background-color: #1e293b; color: #e2e8f0; }
+    .choice-card { transition: all 0.2s; }
+    .choice-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-<div class="w-full max-w-4xl bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl shadow-2xl overflow-hidden min-h-[500px] flex flex-col relative">
-  
-  <div class="bg-slate-900/80 border-b border-slate-800 p-5 flex justify-between items-center z-10">
-    <div>
-      <h1 class="text-xl font-bold text-indigo-400 tracking-tight">SINH HỌC 12</h1>
-      <p class="text-xs text-slate-400 mt-1">Ôn tập trắc nghiệm • Đúng sai • Trả lời ngắn</p>
-    </div>
-    <div id="topControls" class="hidden">
-       <button onclick="backToMenu()" class="text-sm font-medium text-slate-400 hover:text-white transition flex items-center gap-1">
-         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-         Thoát
-       </button>
-    </div>
-  </div>
-
-  <div class="flex-1 p-6 relative overflow-y-auto" id="mainContent">
+  <div class="w-full max-w-5xl">
     
-    <div id="menuView" class="fade-in h-full flex flex-col justify-center">
-      <h2 class="text-2xl font-bold text-center mb-8">Chọn phần thi</h2>
+    <section id="menuSection" class="fade-in w-full bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl">
+      <div class="text-center mb-10">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300 mb-4">
+          SINH HỌC 12 – CUỐI HKI
+        </h1>
+        <p class="text-slate-400 text-lg">Hệ thống câu hỏi trắc nghiệm, đúng sai và trả lời ngắn.</p>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <button onclick="startQuiz('I')" class="group relative p-6 bg-slate-800 rounded-2xl hover:bg-indigo-900/30 border border-slate-700 hover:border-indigo-500 transition-all text-left">
-          <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">I</div>
-          <h3 class="text-lg font-bold text-indigo-300 group-hover:text-indigo-200">Trắc nghiệm</h3>
-          <p class="text-sm text-slate-400 mt-2">Chọn 1 đáp án đúng trong 4 phương án.</p>
+        <button onclick="startQuiz('I')" class="choice-card group relative overflow-hidden bg-slate-800 border border-slate-700 hover:border-indigo-500 rounded-2xl p-6 text-left">
+          <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+            <svg class="w-24 h-24 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-indigo-400 mb-2">Phần I</h3>
+          <p class="text-white font-medium text-lg">Trắc nghiệm</p>
+          <p class="text-slate-400 text-sm mt-2">50 câu hỏi • Chọn 1 đáp án đúng nhất (A, B, C, D).</p>
         </button>
 
-        <button onclick="startQuiz('II')" class="group relative p-6 bg-slate-800 rounded-2xl hover:bg-emerald-900/30 border border-slate-700 hover:border-emerald-500 transition-all text-left">
-          <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">II</div>
-          <h3 class="text-lg font-bold text-emerald-300 group-hover:text-emerald-200">Đúng / Sai</h3>
-          <p class="text-sm text-slate-400 mt-2">Xác định tính đúng sai của 4 ý trong mỗi câu.</p>
+        <button onclick="startQuiz('II')" class="choice-card group relative overflow-hidden bg-slate-800 border border-slate-700 hover:border-emerald-500 rounded-2xl p-6 text-left">
+          <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+            <svg class="w-24 h-24 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-emerald-400 mb-2">Phần II</h3>
+          <p class="text-white font-medium text-lg">Đúng / Sai</p>
+          <p class="text-slate-400 text-sm mt-2">8 câu hỏi lớn • Mỗi câu có 4 ý a, b, c, d.</p>
         </button>
 
-        <button onclick="startQuiz('III')" class="group relative p-6 bg-slate-800 rounded-2xl hover:bg-rose-900/30 border border-slate-700 hover:border-rose-500 transition-all text-left">
-          <div class="absolute top-4 right-4 w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-sm">III</div>
-          <h3 class="text-lg font-bold text-rose-300 group-hover:text-rose-200">Trả lời ngắn</h3>
-          <p class="text-sm text-slate-400 mt-2">Điền số hoặc từ khóa ngắn gọn.</p>
+        <button onclick="startQuiz('III')" class="choice-card group relative overflow-hidden bg-slate-800 border border-slate-700 hover:border-rose-500 rounded-2xl p-6 text-left">
+          <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+            <svg class="w-24 h-24 text-rose-500" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </div>
+          <h3 class="text-2xl font-bold text-rose-400 mb-2">Phần III</h3>
+          <p class="text-white font-medium text-lg">Trả lời ngắn</p>
+          <p class="text-slate-400 text-sm mt-2">10 câu hỏi • Điền số hoặc từ khoá chính xác.</p>
         </button>
       </div>
-    </div>
+    </section>
 
-    <div id="quizView" class="hidden h-full flex flex-col">
-      <div class="w-full bg-slate-800 h-1.5 rounded-full mb-6 overflow-hidden">
-        <div id="progressBar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+    <section id="quizSection" class="hidden w-full flex flex-col gap-6">
+      
+      <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-2 z-50 shadow-lg">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+          <button onclick="backToMenu()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          </button>
+          <div>
+            <h2 id="partTitle" class="font-bold text-lg text-indigo-400">Phần I</h2>
+            <div class="text-xs text-slate-400 flex items-center gap-2">
+              <span id="questionIndex">Câu 1/50</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full sm:w-64">
+          <div class="flex justify-between text-xs text-slate-400 mb-1">
+            <span>Tiến độ</span>
+            <span id="progressText">0%</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div id="progressBar" class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <button onclick="toggleReview()" class="hidden sm:block px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm font-medium transition">
+          Tổng kết
+        </button>
       </div>
 
-      <div class="flex-1 fade-in">
-        <div class="flex justify-between items-end mb-4">
-           <span class="text-sm font-semibold text-indigo-400 uppercase tracking-wider" id="qTypeLabel">PHẦN I</span>
-           <span class="text-2xl font-bold text-slate-600 select-none" id="qIndexDisplay">01</span>
+      <div class="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sm:p-8 min-h-[400px] flex flex-col relative fade-in" id="questionContainer">
+        <div id="questionText" class="text-xl sm:text-2xl font-medium leading-relaxed text-slate-100 mb-8"></div>
+
+        <div id="optionsArea" class="space-y-3 mb-6"></div>
+        <div id="shortAnswerArea" class="hidden mb-6">
+          <div class="flex gap-2">
+            <input id="shortInput" type="text" class="flex-1 px-5 py-4 rounded-xl bg-slate-950 border border-slate-700 text-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition" placeholder="Nhập câu trả lời (số)..." autocomplete="off">
+            <button onclick="checkShort()" class="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition">Chấm</button>
+          </div>
+          <p class="text-sm text-slate-500 mt-2 ml-1">Lưu ý: Dùng dấu chấm (.) hoặc phẩy (,) cho số thập phân đều được.</p>
+        </div>
+
+        <div id="feedback" class="hidden p-5 rounded-xl border mb-6 text-lg"></div>
+
+        <div class="mt-auto pt-6 border-t border-slate-800 flex justify-between">
+          <button id="btnPrev" onclick="navigate(-1)" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">← Trước</button>
+          <div class="flex gap-3">
+             <button onclick="navigate(1)" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-500/20 transition">Tiếp theo →</button>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="toggleReview()" class="sm:hidden w-full py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-medium">
+        Xem bảng tổng kết
+      </button>
+
+    </section>
+
+    <div id="reviewPanel" class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl overflow-hidden">
+        <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900">
+          <h3 class="text-xl font-bold">Tổng kết bài làm</h3>
+          <button onclick="toggleReview()" class="p-2 hover:bg-slate-800 rounded-lg text-slate-400">✕</button>
         </div>
         
-        <h3 id="qText" class="text-xl md:text-2xl font-medium leading-relaxed mb-6 text-slate-100"></h3>
-        
-        <div id="answerArea" class="space-y-3"></div>
-        
-        <div id="feedbackBox" class="hidden mt-6 p-4 rounded-xl bg-slate-800/50 border border-slate-700"></div>
-      </div>
+        <div class="p-5 overflow-y-auto bg-slate-950/50">
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+              <div class="text-slate-400 text-sm">Đã làm</div>
+              <div id="statDone" class="text-2xl font-bold text-indigo-400">0</div>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+              <div class="text-slate-400 text-sm">Đúng</div>
+              <div id="statCorrect" class="text-2xl font-bold text-emerald-400">0</div>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+              <div class="text-slate-400 text-sm">Tỷ lệ</div>
+              <div id="statRate" class="text-2xl font-bold text-slate-200">0%</div>
+            </div>
+          </div>
 
-      <div class="mt-8 flex justify-between items-center pt-4 border-t border-slate-800/50">
-        <button onclick="navigate(-1)" id="btnPrev" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition disabled:opacity-30 disabled:cursor-not-allowed">
-          ← Quay lại
-        </button>
-        <button onclick="navigate(1)" id="btnNext" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-lg shadow-indigo-500/20 transition disabled:opacity-30">
-          Câu tiếp theo →
-        </button>
+          <h4 class="text-sm uppercase tracking-wider text-slate-500 font-bold mb-3">Danh sách câu hỏi</h4>
+          <div id="reviewGrid" class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2"></div>
+        </div>
+
+        <div class="p-5 border-t border-slate-800 bg-slate-900 flex justify-end">
+          <button onclick="toggleReview()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-white">Đóng</button>
+        </div>
       </div>
     </div>
 
   </div>
-</div>
 
 <script>
-/* ================= DỮ LIỆU CÂU HỎI (DATA) ================= */
-// Bạn có thể copy thêm câu hỏi vào đây theo đúng mẫu
+/* ================= DỮ LIỆU CÂU HỎI (FULL) ================= */
 
-const dataPart1 = [
-  { q: "Một đoạn DNA mang thông tin mã hóa cho chuỗi polypeptide được gọi là gì?", opts: ["Codon", "Gene", "Anticodon", "Mã di truyền"], a: 1 }, // Index 1 là Gene (0,1,2,3)
-  { q: "Các base nitơ của RNA gồm những loại nào?", opts: ["A, C, T, G", "A, C, U, G", "A, C, U, T", "C, U, T, G"], a: 1 },
-  { q: "Bộ ba 3’AAT5’ trên mạch gốc sẽ phiên mã thành codon nào trên mRNA?", opts: ["AAU", "UUA", "5’UUA3’", "5’AAU3’"], a: 2 },
-  { q: "Trong các codon sau, codon nào mã hóa cho amino acid?", opts: ["UAA", "UAG", "GCC", "UGA"], a: 2 },
-  { q: "Đặc điểm AUG chỉ mã hóa cho Methionine ở sinh vật nhân thực thể hiện tính chất nào của mã di truyền?", opts: ["Tính đặc hiệu", "Tính thoái hóa", "Tính phổ biến", "Tính liên tục"], a: 0 },
+const partI = [
+  { id:"I-1", type:"mcq", part:"Phần I", q:`Câu 1. Một đoạn của phân tử DNA mang thông tin mã hóa cho một chuỗi polypeptide hay một phân tử RNA được gọi là:`, options:["A. codon.","B. gene.","C. anticodon.","D. mã di truyền."], answer:"B"},
+  { id:"I-2", type:"mcq", part:"Phần I", q:`Câu 2. Các loại base nitơ có trong cấu trúc của phân tử RNA là:`, options:["A. Adenine, Cytosine, Thymine, Guanine.","B. Adenine, Cytosine, Uracil, Guanine.","C. Adenine, Cytosine, Uracil, Thymine.","D. Cytosine, Uracil, Thymine, Guanine."], answer:"B"},
+  { id:"I-3", type:"mcq", part:"Phần I", q:`Câu 3. Bộ ba trên mạch gốc của gene 3’AAT5’ thì codon tương ứng trên mRNA là gì?`, options:["A. 3’AAU5’.","B. 3’UUA5’.","C. 5’UUA3’.","D. 5’AAU3’."], answer:"C"},
+  { id:"I-4", type:"mcq", part:"Phần I", q:`Câu 4. Codon nào sau đây có khả năng mã hóa amino acid?`, options:["A. 5'UAA3'.","B. 5'UAG3'.","C. 5'GCC3'.","D. 5'UGA3'."], answer:"C"},
+  { id:"I-5", type:"mcq", part:"Phần I", q:`Câu 5. Bộ ba 5’AUG3’ chỉ mã hóa amino acid methionine ở sinh vật nhân thực, điều này thể hiện đặc điểm nào sau đây của mã di truyền?`, options:["A. Tính liên tục.","B. Tính đặc hiệu.","C. Tính thoái hoá.","D. Tính phổ biến."], answer:"B"},
+  { id:"I-6", type:"mcq", part:"Phần I", q:`Câu 6. Hình dưới đây mô tả khái quát các thành phần cấu trúc một gene ở sinh vật nhân thực. Thành phần cấu trúc nào mang tín hiệu mở đầu quá trình phiên mã? (Có hình trong đề cương)`, options:["A. Exon 1.","B. Vùng điều hòa.","C. Exon 3.","D. Vùng kết thúc."], answer:"B"},
+  { id:"I-7", type:"mcq", part:"Phần I", q:`Câu 7. Hình 4 mô tả quá trình dịch mã của mRNA tại hai ribosome R1 và R2. Mỗi ribosome sẽ di chuyển về phía nào trên mRNA? (Có hình trong đề cương)`, options:["A. Ribosome R1 và R2 di chuyển về phía đầu X.","B. Ribosome R1 và R2 di chuyển về phía đầu Y.","C. Ribosome R1 di chuyển về đầu Y, R2 về đầu X.","D. Ribosome R1 và R2 đổi vị trí cho nhau trên mRNA."], answer:"B"},
+  { id:"I-8", type:"mcq", part:"Phần I", q:`Câu 8. Trong những năm 1960, Jacques Monod và Francois Jacob cùng các cộng sự đã nghiên cứu sự biểu hiện của các gene liên quan đến sự chuyển hóa chất M ở vi khuẩn E coli theo mô hình operon. Chất M là`, options:["A. glucose.","B. tryptophane.","C. lactose.","D. galactose."], answer:"C"},
+  { id:"I-9", type:"mcq", part:"Phần I", q:`Câu 9. Hình nào dưới đây mô tả đúng cấu trúc Operon Lac ở vi khuẩn E.coli? (Có hình trong đề cương)`, options:["A. Hình 1.","B. Hình 2.","C. Hình 3.","D. Hình 4."], answer:"B"},
+  { id:"I-10", type:"mcq", part:"Phần I", q:`Câu 10. Operon lac của E. coli ở trạng thái biểu hiện gene khi`, options:["A. môi trường xuất hiện lactose.","B. khi gene điều hòa (lacI) hoạt động.","C. môi trường không có lactose.","D. môi trường thừa protein ức chế."], answer:"A"},
+  { id:"I-11", type:"mcq", part:"Phần I", q:`Câu 11. Trong cơ chế điều hoà hoạt động các gene của operon Lac, sự kiện nào sau đây chỉ diễn ra khi môi trường không có lactose?`, options:["A. Một số phân tử lactose liên kết với protein ức chế làm biến đổi cấu hình không gian ba chiều của nó.","B. Protein ức chế liên kết với vùng vận hành ngăn cản quá trình phiên mã của các gene cấu trúc.","C. RNA polymerase liên kết với vùng khởi động để tiến hành phiên mã.","D. Các phân tử mARN của các gene cấu trúc Z, Y, A được dịch mã tạo ra các enzyme phân giải đường lactose."], answer:"B"},
+  { id:"I-12", type:"mcq", part:"Phần I", q:`Câu 12. Sơ đồ dưới đây mô tả nguyên lí tạo thực vật mang gene kháng vi khuẩn gây bệnh nhờ công nghệ DNA tái tổ hợp. Số nào của sơ đồ thể hiện DNA tái tổ hợp? (Có hình trong đề cương)`, options:["A. 1.","B. 2.","C. 4.","D. 6."], answer:"C"},
+  { id:"I-13", type:"mcq", part:"Phần I", q:`Câu 13. Để nối đoạn DNA của tế bào cho và thể truyền người ta dùng enzyme gì?`, options:["A. Restrictase.","B. Ligase.","C. DNA polymerase.","D. Amylase."], answer:"B"},
+  { id:"I-14", type:"mcq", part:"Phần I", q:`Câu 14. Hình sau là bản gel điện di các mẫu DNA... hãy xác định người đàn ông nào có thể là cha của đứa bé? (Có hình trong đề cương)`, options:["A. Người đàn ông D","B. Người đàn ông A","C. Người đàn ông C","D. Người đàn ông B"], answer:"D"},
+  { id:"I-15", type:"mcq", part:"Phần I", q:`Câu 15. Chủng vi khuẩn E.Coli có khả năng sản xuất insulin của người là thành tựu của`, options:["A. gây đột biến.","B. công nghệ gene.","C. lai hữu tính.","D. nhân bản vô tính."], answer:"B"},
+  { id:"I-16", type:"mcq", part:"Phần I", q:`Câu 16. Trong điều trị bệnh thiếu hụt enzyme HGPRT... Liệu pháp gene trong trường hợp này là gì?`, options:["A. Đưa gene bình thường vào cơ thể bệnh nhân để phá hủy gene đột biến.","B. Đưa gene bình thường vào cơ thể bệnh nhân để ức chế biểu hiện của gene đột biến.","C. Đưa gene bình thường vào cơ thể bệnh nhân để tạo enzyme hoạt động.","D. Đưa gene bình thường vào cơ thể bệnh nhân để chỉnh sửa gene đột biến."], answer:"C"},
+  { id:"I-17", type:"mcq", part:"Phần I", q:`Câu 17. Plasmid sử dụng trong kĩ thuật di truyền có đặc điểm nào sau đây đúng?`, options:["A. Là phân tử DNA mạch thẳng.","B. Có khả năng nhân đôi độc lập với DNA nhiễm sắc thể của tế bào chủ.","C. Là vật chất di truyền chủ yếu trong tế bào nhân sơ và trong tế bào thực vật.","D. Là phân tử ARN mạch kép, dạng vòng."], answer:"B"},
+  { id:"I-18", type:"mcq", part:"Phần I", q:`Câu 18. Dạng đột biến điểm nào sau đây làm dịch khung đọc mã di truyền?`, options:["A. Thay thế cặp A-T thành cặp T-A.","B. Thay thế cặp A-T thành cặp G-C.","C. Thay thế cặp G–C thành cặp T-A.","D. Mất cặp nucleotide A-T hay G-C."], answer:"D"},
+  { id:"I-19", type:"mcq", part:"Phần I", q:`Câu 19. Đột biến thay thế 1 cặp A–T bằng 1 cặp G–C sẽ làm số liên kết hydrogen của gene?`, options:["A. Giảm 2.","B. Tăng 1.","C. Tăng 2.","D. Giảm 1."], answer:"C"},
+  { id:"I-20", type:"mcq", part:"Phần I", q:`Câu 20. Đột biến điểm không có dạng nào sau đây?`, options:["A. Mất 1 cặp nucleotide.","B. Thêm 1 cặp nucleotide.","C. Thay thế 1 cặp nucleotide.","D. Đảo 1 cặp nucleotide."], answer:"D"},
+  { id:"I-21", type:"mcq", part:"Phần I", q:`Câu 21. Allele B ở sinh vật nhân sơ... codon 5’UGG3’ thành 5’UGA3’. Nhận định nào sau đây đúng?`, options:["A. Chuỗi polypeptide do allele B tổng hợp khác với chuỗi polypeptide do allele b tổng hợp 1 amino acid.","B. Allele B nhiều hơn allele b một liên kết hydrogen.","C. Đột biến làm thay đổi chức năng protein nên biểu hiện ngay thành kiểu hình ở cơ thể mang đột biến.","D. Chuỗi polypeptide do allele B tổng hợp ngắn hơn chuỗi polypeptide do allele b tổng hợp."], answer:"B"},
+  { id:"I-22", type:"mcq", part:"Phần I", q:`Câu 22. Đơn vị cấu trúc gồm một đoạn DNA chứa 146 cặp nucleotide quấn quanh 8 phân tử histon 1¾ vòng được gọi là gì?`, options:["A. Sợi nhiễm sắc.","B. Nucleosome.","C. Sợi cơ bản.","D. DNA."], answer:"B"},
+  { id:"I-23", type:"mcq", part:"Phần I", q:`Câu 23. Phát biểu nào sau đây đúng với các thông tin trên hình bên dưới? (Có hình trong đề cương)`, options:["A. Số loại giao tử tối đa của cặp NST này là 4.","B. Mỗi gene trên cặp NST này đều có 2 trạng thái.","C. Cặp NST này có 6 locus gene.","D. Có 2 nhóm gene liên kết là PaB và Pab."], answer:"D"},
+  { id:"I-24", type:"mcq", part:"Phần I", q:`Câu 24. Trong các hình sau, hình số mấy mô tả đúng trình tự các gene (Y, Z, A) trên cặp NST tương đồng? (Có hình trong đề cương)`, options:["A. 1.","B. 3.","C. 4.","D. 2."], answer:"D"},
+  { id:"I-25", type:"mcq", part:"Phần I", q:`Câu 25. Hai gene cùng vị trí trên cặp NST tương đồng được gọi là`, options:["A. cặp chromatid.","B. cặp gene tương đồng.","C. cặp locus.","D. cặp allele."], answer:"D"},
+  { id:"I-26", type:"mcq", part:"Phần I", q:`Câu 26. Đơn vị nhỏ nhất trong cấu trúc của nhiễm sắc thể có đủ 2 thành phần DNA và protein histone là`, options:["A. nucleosome.","B. polysome.","C. nucleotide.","D. sợi cơ bản."], answer:"A"},
+  { id:"I-27", type:"mcq", part:"Phần I", q:`Câu 27. Trong các mức cấu trúc siêu hiển vi của nhiễm sắc thể, cấu trúc nào có đường kính 10nm?`, options:["A. Vùng xếp cuộn.","B. Sợi nhiễm sắc.","C. Sợi cơ bản.","D. Cromatide."], answer:"C"},
+  { id:"I-28", type:"mcq", part:"Phần I", q:`Câu 28. Hợp tử được hình thành trong trường hợp nào sau đây có thể phát triển thành thể đa bội lẻ?`, options:["A. Giao tử (n - 1) kết hợp với giao tử (n + 1).","B. Giao tử (n) kết hợp với giao tử (n + 1).","C. Giao tử (2n) kết hợp với giao tử (2n).","D. Giao tử (n) kết hợp với giao tử (2n)."], answer:"A"},
+  { id:"I-29", type:"mcq", part:"Phần I", q:`Câu 29. Từ sơ đồ kiểu nhân ở hình sau, dạng đột biến số lượng NST nào đã xảy ra? (Có hình trong đề cương)`, options:["A. Thể ba.","B. Thể bốn.","C. Thể không.","D. Thể một."], answer:"A"},
+  { id:"I-30", type:"mcq", part:"Phần I", q:`Câu 30. Dạng đột biến nào sau đây làm tăng chiều dài của 1 NST?`, options:["A. Dị đa bội.","B. Tự đa bội.","C. Lặp đoạn NST.","D. Đảo đoạn NST."], answer:"C"},
+  { id:"I-31", type:"mcq", part:"Phần I", q:`Câu 31. Bộ NST lưỡng bội bình thường của một loài có 12 NST, trong tế bào cá thể B chỉ có 1 NST ở cặp thứ 4... Cá thể đó bị đột biến thuộc dạng`, options:["A. thể tam bội.","B. thể một.","C. thể đa bội lẻ.","D. thể đơn bội lẻ."], answer:"B"},
+  { id:"I-32", type:"mcq", part:"Phần I", q:`Câu 32. Ở một loài thực vật lưỡng bội (2n = 8)... xuất hiện thể một. Thể một này có bộ NST nào?`, options:["A. AaBbEe.","B. AaaBbDdEe.","C. AaBbDEe.","D. AaBbDddEe."], answer:"C"},
+  { id:"I-33", type:"mcq", part:"Phần I", q:`Câu 33. Một loài thực vật có bộ NST lưỡng bội 2n = 24. Trong tế bào sinh dưỡng của cây tam bội... chứa bao nhiêu NST?`, options:["A. 12.","B. 25.","C. 36.","D. 48."], answer:"C"},
+  { id:"I-34", type:"mcq", part:"Phần I", q:`Câu 34. Hiện tượng ở cây phù dung với sắc hoa thay đổi liên tục... được gọi là`, options:["A. thường biến.","B. mức phản ứng.","C. biến dị cá thể.","D. biến dị tổ hợp."], answer:"A"},
+  { id:"I-35", type:"mcq", part:"Phần I", q:`Câu 35. Trường hợp nào sau đây phản ánh sự tương tác giữa kiểu gene và môi trường?`, options:["A. Người mắc bệnh bạch tạng...","B. Khi có ánh sáng, thực vật quang hợp...","C. Bệnh mù màu...","D. Thỏ Himalaya nuôi ở 25℃ có đen ở tai/đuôi..., nuôi ở 30℃ thì trắng."], answer:"D"},
+  { id:"I-36", type:"mcq", part:"Phần I", q:`Câu 36. Đo chiều dài tai và đuôi của thỏ ở 3 vùng... Nhân tố nào ảnh hưởng? (Có bảng trong đề cương)`, options:["A. Độ ẩm.","B. Lượng mưa.","C. Nhiệt độ.","D. Thức ăn."], answer:"C"},
+  { id:"I-37", type:"mcq", part:"Phần I", q:`Câu 37. Một gene chi phối nhiều tính trạng được gọi là gì?`, options:["A. Gene đa alelle.","B. Một gene quy định một tính trạng.","C. Gene đa hiệu.","D. Nhiều gene quy định một tính trạng."], answer:"C"},
+  { id:"I-38", type:"mcq", part:"Phần I", q:`Câu 38. Cơ thể có kiểu gene ... Nhận định sau đây đúng? (Kiểu gene hiển thị trong đề cương)`, options:["A. 3 cặp gene trên 3 cặp NST thường.","B. 3 cặp gene trên 2 cặp NST thường.","C. 3 cặp gene trên 4 cặp NST thường.","D. 3 cặp gene trên 1 cặp NST thường."], answer:"B"},
+  { id:"I-39", type:"mcq", part:"Phần I", q:`Câu 39. Một cơ thể thực vật có kiểu gene AaBB tự thụ phấn. Theo lí thuyết, ở đời con tạo ra tối đa bao nhiêu loại dòng thuần?`, options:["A. 2.","B. 1.","C. 4.","D. 8."], answer:"A"},
+  { id:"I-40", type:"mcq", part:"Phần I", q:`Câu 40. Ở 1 loài thực vật, A thân cao trội hoàn toàn so với a thân thấp, B hoa đỏ trội hoàn toàn so với b hoa trắng. Kiểu gene nào quy định thân cao, hoa trắng?`, options:["A. aabb.","B. aaBb.","C. AABB.","D. Aabb."], answer:"D"},
+  { id:"I-41", type:"mcq", part:"Phần I", q:`Câu 41. Cơ thể có kiểu gene nào sau đây là cơ thể thuần chủng?`, options:["A. Aabb.","B. AaBb.","C. AABb.","D. AAbb."], answer:"D"},
+  { id:"I-42", type:"mcq", part:"Phần I", q:`Câu 42. Phép lai nào dưới đây là phép lai thuận nghịch?`, options:["A. ♂ AA × ♀ aa và ♀ Aa × ♂ Aa.","B. ♂ AA × ♀ aa và ♀ AA × ♂ aa.","C. ♂ Aa × ♀ Aa và ♂ aa × ♀ AA.","D. ♂ AA × ♀ AA và ♀ aa × ♂ aa."], answer:"B"},
+  { id:"I-43", type:"mcq", part:"Phần I", q:`Câu 43. Một loài thực vật, A hoa đỏ trội hoàn toàn so với a hoa trắng. Phép lai nào tạo ra đời con gồm toàn cây hoa trắng?`, options:["A. Aa × Aa.","B. Aa × aa.","C. AA × AA.","D. aa × aa."], answer:"D"},
+  { id:"I-44", type:"mcq", part:"Phần I", q:`Câu 44. Ở hoa mõm sói: AA đỏ, Aa hồng, aa trắng. Phép lai nào cho đời con có 3 loại kiểu gene, 3 loại kiểu hình?`, options:["A. Aa × Aa.","B. AA × aa.","C. aa × aa.","D. Aa × aa."], answer:"A"},
+  { id:"I-45", type:"mcq", part:"Phần I", q:`Câu 45. Ở người, bệnh do gene lặn trên NST X, không có allele tương ứng trên Y. Bố và mẹ bình thường nhưng sinh con bị bệnh máu khó đông. Có thể nói gì về giới tính của người con?`, options:["A. Khả năng là con trai 25%, con gái 75%","B. Chắc chắn là con trai","C. Khả năng là con trai 50%, con gái 50%","D. Chắc chắn là con gái"], answer:"B"},
+  { id:"I-46", type:"mcq", part:"Phần I", q:`Câu 46. Nhà khoa học nào phát hiện ra hiện tượng di truyền liên kết với giới tính ở ruồi giấm?`, options:["A. K. Coren.","B. T. H. Moocgan.","C. J. Mono.","D. G. J. Menđen."], answer:"B"},
+  { id:"I-47", type:"mcq", part:"Phần I", q:`Câu 47. Ở ruồi giấm, gene ở vùng không tương đồng trên NST X... ruồi đực mắt đỏ có kiểu gene`, options:["A. XAXa.","B. XAY.","C. XAXA.","D. XaY."], answer:"B"},
+  { id:"I-48", type:"mcq", part:"Phần I", q:`Câu 48. Phép lai về 3 cặp tính trạng trội, lặn hoàn toàn giữa 2 cá thể AaBbDd × AabbDd sẽ cho thế hệ sau`, options:["A. 8 kiểu hình: 18 kiểu gene.","B. 8 kiểu hình: 27 kiểu gene.","C. 4 kiểu hình: 9 kiểu gene.","D. 8 kiểu hình: 12 kiểu gene."], answer:"A"},
+  { id:"I-49", type:"mcq", part:"Phần I", q:`Câu 49. Phát biểu sau đây đúng về quần thể ngẫu phối?`, options:["A. Sự giao phối diễn ra trên từng cá thể.","B. Các cá thể giao phối với nhau một cách có chọn lựa.","C. Giao tử đực và giao tử cái của một cá thể kết hợp với nhau.","D. Các cá thể giao phối với nhau một cách hoàn toàn ngẫu nhiên."], answer:"D"},
+  { id:"I-50", type:"mcq", part:"Phần I", q:`Câu 50. Phát biểu nào sau đây về ứng dụng giải trình tự hệ gene người là không đúng?`, options:["A. Thông tin về các oncogene...","B. Sàng lọc đột biến gene gây bệnh di truyền...","C. So sánh hệ gene người hiện đại với người cổ...","D. Sàng lọc giới tính trước khi sinh."], answer:"D"},
 ];
 
-const dataPart2 = [
-  { 
-    q: "Nhận định về quá trình phiên mã ở sinh vật nhân thực:", 
-    items: [
-      { t: "Có sự tham gia của enzyme RNA polymerase", a: true },
-      { t: "Chỉ tạo ra duy nhất một loại mRNA từ một gene", a: false },
-      { t: "Luôn diễn ra sự cắt nối exon – intron (ở gene phân mảnh)", a: true },
-      { t: "Quá trình này diễn ra chủ yếu trong tế bào chất", a: false }
-    ]
-  },
-  {
-    q: "Về hoạt động của Operon Lac ở vi khuẩn E. coli:",
-    items: [
-      { t: "Lactose đóng vai trò là chất cảm ứng", a: true },
-      { t: "Protein ức chế gắn vào vùng vận hành (O) khi môi trường có lactose", a: false },
-      { t: "Gene Z mã hóa enzyme phân giải đường lactose", a: true },
-      { t: "Cơ chế này cũng tìm thấy phổ biến ở sinh vật nhân thực đa bào", a: false }
-    ]
-  }
+const partII = [
+  { id:"II-1", type:"tf", part:"Phần II", q:`Câu 1. (Có hình trong đề cương)`, statements:["a) Hình ảnh trên mô tả cơ chế phiên mã của sinh vật nhân thực.","b) Phân tử đang được tổng hợp có chiều từ E (5’) đến F (3’).","c) Quá trình này chỉ tạo ra được 1 loại mRNA trưởng thành.","d) Cơ chế này có sự tham gia của enzyme RNA polimerase."], answer:{a:false,b:true,c:false,d:true}},
+  { id:"II-2", type:"tf", part:"Phần II", q:`Câu 2. (Biểu đồ 4,5 – có hình trong đề cương)`, statements:["a) Thuốc X: lượng mRNA và protein tạo ra ít hơn hẳn so với mẫu đối chứng.","b) Thuốc X: ngăn cản quá trình phiên mã của virus dẫn đến giảm mRNA và giảm protein.","c) Thuốc Y: lượng mRNA tương đương mẫu đối chứng nhưng lượng protein tạo ra tăng.","d) Thuốc Y: cơ chế tác động của thuốc là ngăn cản quá trình dịch mã của virus."], answer:{a:true,b:true,c:true,d:false}},
+  { id:"II-3", type:"tf", part:"Phần II", q:`Câu 3. Polisome... (Có hình trong đề cương)`, statements:["a) Các cấu trúc: X: mRNA, Y: ribosome.","b) Z: chuỗi pôlipeptit, T: tRNA-aa.","c) Ý nghĩa sinh học của hiện tượng giúp tăng năng suất quá trình dịch mã.","d) Chiều di chuyển của các cấu trúc Y từ phải sang trái."], answer:{a:true,b:true,c:true,d:false}},
+  { id:"II-4", type:"tf", part:"Phần II", q:`Câu 4. Theo dõi mức biểu hiện gene Lac Z theo thời gian (bảng số liệu trong đề cương).`, statements:["a) Gene Z được kích hoạt ngay khi vi khuẩn được nuôi cấy và không phụ thuộc lactose.","b) Lactose là chất cảm ứng, liên kết với chất ức chế làm chất ức chế không gắn vùng vận hành, cho phép gene Z phiên mã.","c) Tốc độ phiên mã của gene Lac Z đạt cao nhất sau 15 phút nuôi cấy.","d) Nếu E. coli mất khả năng tổng hợp protein ức chế thì gene Z vẫn được phiên mã liên tục khi cạn kiệt lactose."], answer:{a:false,b:true,c:false,d:true}},
+  { id:"II-5", type:"tf", part:"Phần II", q:`Câu 5. Đột biến gen – đúng hay sai?`, statements:["a) Trong tái bản DNA, base dạng hiếm có thể làm phát sinh đột biến gene.","b) Mức độ gây hại của allele đột biến phụ thuộc môi trường và tổ hợp gene.","c) Thay thế một cặp nucleotide trong gene sẽ làm thay đổi trình tự amino acid trong chuỗi polypeptide.","d) Đột biến thay thế cặp nucleotide có thể làm tăng số allele của một gene trong vốn gene quần thể."], answer:{a:true,b:true,c:false,d:true}},
+  { id:"II-6", type:"tf", part:"Phần II", q:`Câu 6. Gene bình thường (H) và gene đột biến (H1) (Có hình trong đề cương).`, statements:["a) gene H1 là đột biến thay thế 1 cặp nucleotide.","b) Đột biến này thường ít gây hậu quả hơn đột biến mất nên có ý nghĩa trong tiến hóa và chọn giống.","c) Polypeptide đột biến thay đổi so với ban đầu kể từ amino acid ứng với bộ ba có cặp nucleotide thêm trở về sau (dịch khung).","d) Số liên kết hydrogen gene đột biến tăng 2 so với gene ban đầu."], answer:{a:false,b:true,c:true,d:true}},
+  { id:"II-7", type:"tf", part:"Phần II", q:`Câu 7. Cấu trúc trong nhân tế bào (Có hình trong đề cương).`, statements:["a) Hai gene D/D và d/d trên 2 NST kép thuộc cùng một locus.","b) Nếu gene A/a được nhân đôi 3 lần thì gene b nhân đôi có thể khác 3 lần.","c) Mô tả 2 NST kép khác cặp tương đồng.","d) Hai gene A/a và B/b thuộc 2 locus khác nhau."], answer:{a:true,b:false,c:true,d:true}},
+  { id:"II-8", type:"tf", part:"Phần II", q:`Câu 8. Cơ sở tế bào học thí nghiệm kiểm chứng của Mendel (Có hình trong đề cương).`, statements:["a) Kiểu gene của (4) là AaBb và kiểu hình hạt vàng, vỏ trơn chiếm 25%.","b) (1) cho giao tử AB chiếm 100%.","c) F1 cho 4 loại giao tử bằng nhau.","d) Với 1000 tế bào sinh dục đực (P) giảm phân bình thường và tất cả đều sống và thụ tinh thì số lượng hạt phấn ở (1) hoặc (2) là 1000."], answer:{a:false,b:true,c:true,d:false}},
 ];
 
-const dataPart3 = [
-  { q: "Có bao nhiêu thành phần tham gia trực tiếp vào quá trình dịch mã (mRNA, tRNA, Ribosome, Acid amin)?", a: "4" },
-  { q: "Đột biến điểm dạng thay thế 1 cặp nucleotide liên quan đến bao nhiêu cặp nucleotide?", a: "1" },
-  { q: "Một loài có bộ NST 2n = 8. Thể một (2n-1) của loài này có bao nhiêu nhiễm sắc thể?", a: "7" }
+const partIII = [
+  { id:"III-1", type:"short", part:"Phần III", q:`Câu 1. Cho các thành phần: 1. DNA; 2. mRNA; 3. Ribosome; 4. tRNA; 5. RNA polimerase; 6. DNA polimerase. Có bao nhiêu thành phần tham gia trực tiếp vào quá trình dịch mã?`, answer:"3"},
+  { id:"III-2", type:"short", part:"Phần III", q:`Câu 2. Đột biến điểm là dạng đột biến gene liên quan đến bao nhiêu cặp nucleotide?`, answer:"1"},
+  { id:"III-3", type:"short", part:"Phần III", q:`Câu 3. Trong các bệnh/hội chứng (1)–(8) liệt kê trong đề, có bao nhiêu bệnh/hội chứng liên quan đến đột biến số lượng NST?`, answer:"3"},
+  { id:"III-4", type:"short", part:"Phần III", q:`Câu 4. Loài 2n = 8, xuất hiện thể một nhiễm kép (Có hình trong đề cương). Tế bào ở hình số mấy chứa bộ NST của thể đột biến này?`, answer:"1"},
+  { id:"III-5", type:"short", part:"Phần III", q:`Câu 5. Phép lai Aa × aa (giảm phân, thụ tinh bình thường). Kiểu hình trội chiếm tỉ lệ bao nhiêu (%)?`, answer:"50"},
+  { id:"III-6", type:"short", part:"Phần III", q:`Câu 6. Thí nghiệm Mendel về màu hoa (Có hình). Có bao nhiêu cây có kiểu gen Aa?`, answer:"5"},
+  { id:"III-7", type:"short", part:"Phần III", q:`Câu 7. Gene quy định hình dạng quả (A trơn trội hoàn toàn so với a nhăn). Có bao nhiêu phép lai giữa các cây thu được 1 loại kiểu hình?`, answer:"4"},
+  { id:"III-8", type:"short", part:"Phần III", q:`Câu 8. AaBbDD × AaBBDd (giảm phân, thụ tinh bình thường). Kiểu gene đồng hợp trội cả 3 cặp gene chiếm tỉ lệ bao nhiêu (%)? (làm tròn 2 chữ số)`, answer:"6.25"},
+  { id:"III-9", type:"short", part:"Phần III", q:`Câu 9. Các bộ NST: 3n,4n,5n,6n,7n,8n,9n,2n+1,2n-1,2n-1-1,2n+1+1. Có bao nhiêu cơ thể thuộc dạng đa bội lẻ?`, answer:"4"},
+  { id:"III-10", type:"short", part:"Phần III", q:`Câu 10. Loài có 4 cặp NST Aa, Bb, Dd, Ee. Trong các bộ NST I–VI (liệt kê trong đề), có bao nhiêu thể ba?`, answer:"3"},
 ];
 
-/* ================= LOGIC ỨNG DỤNG ================= */
+/* ================= APP LOGIC ================= */
 
-let currentPart = '';
 let currentQuestions = [];
 let currentIndex = 0;
-// Lưu trữ trạng thái làm bài: { [index]: user_answer }
-let userState = {}; 
+let userResults = []; // Lưu trạng thái làm bài: { status: 'pending'|'correct'|'wrong', userAns: any }
 
-const menuView = document.getElementById('menuView');
-const quizView = document.getElementById('quizView');
-const topControls = document.getElementById('topControls');
-
-// --- HÀM ĐIỀU HƯỚNG ---
+// DOM Elements
+const menuSection = document.getElementById('menuSection');
+const quizSection = document.getElementById('quizSection');
+const reviewPanel = document.getElementById('reviewPanel');
+const questionText = document.getElementById('questionText');
+const optionsArea = document.getElementById('optionsArea');
+const feedback = document.getElementById('feedback');
+const shortAnswerArea = document.getElementById('shortAnswerArea');
+const shortInput = document.getElementById('shortInput');
 
 function startQuiz(part) {
-  currentPart = part;
-  currentIndex = 0;
-  userState = {}; // Reset trạng thái khi bắt đầu mới
-  
-  // Chọn data tương ứng
-  if (part === 'I') currentQuestions = dataPart1;
-  else if (part === 'II') currentQuestions = dataPart2;
-  else currentQuestions = dataPart3;
+  // Chọn bộ câu hỏi
+  if (part === 'I') currentQuestions = [...partI];
+  else if (part === 'II') currentQuestions = [...partII];
+  else currentQuestions = [...partIII];
 
+  // Reset trạng thái
+  currentIndex = 0;
+  userResults = currentQuestions.map(() => ({ status: 'pending', userAns: null }));
+  
   // Chuyển màn hình
-  menuView.classList.add('hidden');
-  quizView.classList.remove('hidden');
-  topControls.classList.remove('hidden');
+  menuSection.classList.add('hidden');
+  quizSection.classList.remove('hidden');
   
   renderQuestion();
 }
 
 function backToMenu() {
-  if(confirm("Bạn có chắc muốn thoát? Kết quả hiện tại sẽ mất.")){
-    quizView.classList.add('hidden');
-    topControls.classList.add('hidden');
-    menuView.classList.remove('hidden');
+  if (confirm("Bạn có chắc muốn thoát? Kết quả sẽ bị mất.")) {
+    quizSection.classList.add('hidden');
+    menuSection.classList.remove('hidden');
   }
 }
 
-function navigate(direction) {
-  const newIndex = currentIndex + direction;
+function navigate(dir) {
+  const newIndex = currentIndex + dir;
   if (newIndex >= 0 && newIndex < currentQuestions.length) {
     currentIndex = newIndex;
     renderQuestion();
   }
 }
 
-// --- HÀM RENDER CHÍNH ---
-
 function renderQuestion() {
   const q = currentQuestions[currentIndex];
+  const state = userResults[currentIndex];
   
-  // Update UI Header
-  document.getElementById('qTypeLabel').innerText = `PHẦN ${currentPart}`;
-  document.getElementById('qIndexDisplay').innerText = `${currentIndex + 1}/${currentQuestions.length}`;
-  document.getElementById('progressBar').style.width = `${((currentIndex + 1) / currentQuestions.length) * 100}%`;
+  // UI Info
+  document.getElementById('partTitle').innerText = q.part;
+  document.getElementById('questionIndex').innerText = `Câu ${currentIndex + 1}/${currentQuestions.length}`;
   
-  // Update Content
-  const qTextEl = document.getElementById('qText');
-  const ansArea = document.getElementById('answerArea');
-  const feedbackBox = document.getElementById('feedbackBox');
+  // Progress Bar
+  const percent = ((currentIndex + 1) / currentQuestions.length) * 100;
+  document.getElementById('progressBar').style.width = `${percent}%`;
+  document.getElementById('progressText').innerText = `${Math.round(percent)}%`;
+
+  // Question Content
+  questionText.innerText = q.q;
+  optionsArea.innerHTML = '';
+  shortAnswerArea.classList.add('hidden');
+  feedback.classList.add('hidden');
   
-  qTextEl.innerText = q.q;
-  ansArea.innerHTML = '';
-  feedbackBox.classList.add('hidden'); // Ẩn feedback khi chuyển câu
-  
-  // Disable nút Prev/Next nếu cần
+  // Disable prev/next buttons properly
   document.getElementById('btnPrev').disabled = (currentIndex === 0);
-  document.getElementById('btnNext').disabled = (currentIndex === currentQuestions.length - 1);
 
-  // Hiệu ứng fade nhẹ
-  qTextEl.parentElement.classList.remove('fade-in');
-  void qTextEl.parentElement.offsetWidth; // trigger reflow
-  qTextEl.parentElement.classList.add('fade-in');
-
-  // RENDER THEO TỪNG LOẠI
-  if (currentPart === 'I') renderPart1(q, ansArea);
-  else if (currentPart === 'II') renderPart2(q, ansArea);
-  else renderPart3(q, ansArea);
+  // Render theo loại câu hỏi
+  if (q.type === 'mcq') renderMCQ(q, state);
+  else if (q.type === 'tf') renderTF(q, state);
+  else renderShort(q, state);
+  
+  // Animation fade-in cho câu hỏi mới
+  const container = document.getElementById('questionContainer');
+  container.classList.remove('fade-in');
+  void container.offsetWidth; // trigger reflow
+  container.classList.add('fade-in');
 }
 
-// --- RENDER PHẦN I (TRẮC NGHIỆM) ---
-function renderPart1(q, container) {
-  const savedAns = userState[currentIndex]; // Lấy đáp án đã chọn (nếu có)
-  const isAnswered = savedAns !== undefined;
-
-  q.opts.forEach((opt, idx) => {
+/* --- XỬ LÝ TRẮC NGHIỆM (MCQ) --- */
+function renderMCQ(q, state) {
+  q.options.forEach((opt, idx) => {
+    const char = ["A","B","C","D"][idx];
     const btn = document.createElement('button');
-    btn.className = `w-full text-left p-4 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition flex items-center gap-3`;
+    btn.className = "w-full text-left p-4 rounded-xl border bg-slate-800/50 border-slate-700 hover:bg-slate-800 transition flex items-start gap-3 group";
     
-    // Logic màu sắc
-    if (isAnswered) {
-      if (idx === q.a) {
-        btn.classList.add('correct'); // Đáp án đúng luôn xanh
-      } else if (idx === savedAns && savedAns !== q.a) {
-        btn.classList.add('wrong'); // Chọn sai thì đỏ
-      } else {
-        btn.classList.add('opacity-50'); // Các câu còn lại mờ đi
-      }
+    // Nếu đã làm rồi, hiện màu sắc
+    if (state.status !== 'pending') {
       btn.disabled = true;
+      if (char === q.answer) {
+        btn.className = "w-full text-left p-4 rounded-xl border bg-emerald-900/30 border-emerald-500 text-emerald-100 flex items-start gap-3";
+      } else if (state.userAns === char) {
+        btn.className = "w-full text-left p-4 rounded-xl border bg-rose-900/30 border-rose-500 text-rose-100 flex items-start gap-3";
+      } else {
+         btn.className += " opacity-50";
+      }
+    } else {
+      btn.onclick = () => checkMCQ(char);
     }
 
     btn.innerHTML = `
-      <span class="flex-shrink-0 w-8 h-8 rounded-full border border-current flex items-center justify-center font-bold text-sm">
-        ${String.fromCharCode(65 + idx)}
-      </span>
-      <span>${opt}</span>
+      <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-700 text-slate-200 font-bold flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition">${char}</span>
+      <span class="mt-1">${opt.substring(3)}</span>
     `;
-    
-    if (!isAnswered) {
-      btn.onclick = () => handleAnswerPart1(idx);
-    }
-    
-    container.appendChild(btn);
-  });
-}
-
-function handleAnswerPart1(selectedIndex) {
-  userState[currentIndex] = selectedIndex; // Lưu trạng thái
-  renderQuestion(); // Re-render để hiện màu
-}
-
-// --- RENDER PHẦN II (ĐÚNG/SAI) ---
-function renderPart2(q, container) {
-  // Container cho bảng đúng sai
-  const table = document.createElement('div');
-  table.className = "space-y-4";
-  
-  if (!userState[currentIndex]) userState[currentIndex] = {}; // Init object lưu 4 ý
-
-  q.items.forEach((item, idx) => {
-    const rowState = userState[currentIndex][idx]; // null, true, or false (lựa chọn của user)
-    const isRowDone = rowState !== undefined;
-
-    const row = document.createElement('div');
-    row.className = "p-4 rounded-xl bg-slate-800/50 border border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4";
-    
-    // Text nội dung
-    const textDiv = document.createElement('div');
-    textDiv.className = "flex-1 text-slate-200";
-    textDiv.innerText = `${idx + 1}. ${item.t}`;
-    
-    // Button Group
-    const btnGroup = document.createElement('div');
-    btnGroup.className = "flex gap-2 shrink-0";
-
-    // Nút ĐÚNG
-    const btnTrue = createTFBtn(true, item.a, rowState);
-    const btnFalse = createTFBtn(false, item.a, rowState);
-
-    // Logic click
-    if (!isRowDone) {
-      btnTrue.onclick = () => handleAnswerPart2(idx, true);
-      btnFalse.onclick = () => handleAnswerPart2(idx, false);
-    } else {
-        btnTrue.disabled = true;
-        btnFalse.disabled = true;
-    }
-
-    btnGroup.append(btnTrue, btnFalse);
-    row.append(textDiv, btnGroup);
-    table.appendChild(row);
+    optionsArea.appendChild(btn);
   });
   
-  container.appendChild(table);
+  if (state.status !== 'pending') showFeedback(state.status === 'correct', `Đáp án đúng: ${q.answer}`);
 }
 
-// Helper tạo nút Đúng/Sai
-function createTFBtn(isBtnTrue, correctAnswer, userChoice) {
-  const btn = document.createElement('button');
-  const label = isBtnTrue ? "Đúng" : "Sai";
+function checkMCQ(ans) {
+  const q = currentQuestions[currentIndex];
+  const isCorrect = (ans === q.answer);
   
-  // Style cơ bản
-  btn.className = "px-4 py-1.5 rounded-lg border text-sm font-semibold transition-all min-w-[70px] ";
+  userResults[currentIndex] = {
+    status: isCorrect ? 'correct' : 'wrong',
+    userAns: ans
+  };
   
-  if (userChoice === undefined) {
-    // Chưa chọn
-    btn.className += "bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-300";
-  } else {
-    // Đã chọn
-    if (userChoice === isBtnTrue) {
-      // Đây là nút người dùng đã bấm
-      if (userChoice === correctAnswer) {
-        btn.className += "bg-emerald-600 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]"; // Chọn đúng
-      } else {
-        btn.className += "bg-rose-600 border-rose-500 text-white"; // Chọn sai
-      }
-    } else {
-      // Nút người dùng KHÔNG bấm
-      // Nếu nút này là đáp án đúng (mà người dùng không bấm), hiện viền xanh gợi ý
-      if (isBtnTrue === correctAnswer) {
-         btn.className += "bg-transparent border-emerald-500 text-emerald-500 opacity-60";
-      } else {
-         btn.className += "bg-transparent border-slate-700 text-slate-600 opacity-30";
-      }
-    }
-  }
-  
-  btn.innerText = label;
-  return btn;
-}
-
-function handleAnswerPart2(itemIdx, choice) {
-  userState[currentIndex][itemIdx] = choice;
   renderQuestion();
 }
 
-// --- RENDER PHẦN III (TRẢ LỜI NGẮN) ---
-function renderPart3(q, container) {
-  const savedVal = userState[currentIndex];
-  const isDone = savedVal !== undefined;
+/* --- XỬ LÝ ĐÚNG / SAI (TF) --- */
+function renderTF(q, state) {
+  // Nếu chưa có state userAns (hoặc mới reset), tạo object rỗng
+  if (!state.userAns) state.userAns = { a: null, b: null, c: null, d: null };
 
-  const wrapper = document.createElement('div');
-  
-  const input = document.createElement('input');
-  input.type = "text";
-  input.className = "w-full p-4 text-lg rounded-xl bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition";
-  input.placeholder = "Nhập đáp án của bạn...";
-  if (isDone) {
-    input.value = savedVal;
-    input.disabled = true;
-    // Kiểm tra đúng sai để style input
-    if (normalize(savedVal) == normalize(q.a)) {
-        input.classList.add("border-emerald-500", "text-emerald-400");
-    } else {
-        input.classList.add("border-rose-500", "text-rose-400");
-    }
-  }
+  const isSubmitted = state.status !== 'pending';
 
-  const btnSubmit = document.createElement('button');
-  btnSubmit.className = "mt-4 btn px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white font-semibold transition disabled:hidden";
-  btnSubmit.innerText = "Trả lời";
-  btnSubmit.onclick = () => {
-    const val = input.value.trim();
-    if(!val) return;
-    userState[currentIndex] = val;
-    renderQuestion();
-  };
+  ['a', 'b', 'c', 'd'].forEach((key, idx) => {
+    const statement = q.statements[idx];
+    const row = document.createElement('div');
+    row.className = "bg-slate-950/50 p-4 rounded-xl border border-slate-800";
+    
+    const contentHtml = `<div class="mb-3 text-slate-200 font-medium">${statement}</div>`;
+    row.innerHTML = contentHtml;
 
-  if (isDone) btnSubmit.classList.add('hidden');
+    const btnGroup = document.createElement('div');
+    btnGroup.className = "flex gap-3";
 
-  wrapper.append(input, btnSubmit);
-  container.appendChild(wrapper);
+    ['Đúng', 'Sai'].forEach(label => {
+      const val = (label === 'Đúng');
+      const btn = document.createElement('button');
+      btn.className = "flex-1 py-2 rounded-lg border text-sm font-bold transition ";
+      
+      const isSelected = (state.userAns[key] === val);
 
-  // Hiển thị feedback ngay lập tức nếu đã làm
-  if (isDone) {
-    const fb = document.getElementById('feedbackBox');
-    fb.classList.remove('hidden');
-    const isCorrect = normalize(savedVal) == normalize(q.a);
-    fb.className = `mt-6 p-4 rounded-xl border ${isCorrect ? 'border-emerald-500/30 bg-emerald-900/10' : 'border-rose-500/30 bg-rose-900/10'}`;
-    fb.innerHTML = isCorrect 
-      ? `<div class="flex items-center gap-2 text-emerald-400 font-bold"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Chính xác!</div>`
-      : `<div class="text-rose-400 font-bold mb-1">Sai rồi</div><div class="text-slate-300">Đáp án đúng là: <span class="font-mono font-bold text-white">${q.a}</span></div>`;
+      if (isSubmitted) {
+        btn.disabled = true;
+        // Logic hiển thị màu sau khi nộp
+        if (q.answer[key] === val) {
+           // Đây là đáp án đúng của hệ thống
+           if (isSelected) {
+             btn.className += "bg-emerald-600 border-emerald-500 text-white"; // User chọn đúng
+           } else {
+             btn.className += "bg-emerald-900/40 border-emerald-800 text-emerald-500 opacity-60"; // User không chọn nhưng nó đúng
+           }
+        } else {
+           // Đây là đáp án sai của hệ thống
+           if (isSelected) {
+             btn.className += "bg-rose-600 border-rose-500 text-white"; // User chọn sai
+           } else {
+             btn.className += "bg-slate-800 border-slate-700 text-slate-500 opacity-30";
+           }
+        }
+      } else {
+        // Chưa nộp
+        if (isSelected) {
+           btn.className += "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/30";
+        } else {
+           btn.className += "bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800";
+        }
+        btn.onclick = () => {
+          state.userAns[key] = val;
+          renderQuestion(); // Re-render để update UI nút bấm
+        };
+      }
+      btn.innerText = label;
+      btnGroup.appendChild(btn);
+    });
+
+    row.appendChild(btnGroup);
+    optionsArea.appendChild(row);
+  });
+
+  // Nút Chấm điểm
+  if (!isSubmitted) {
+    const submitBtn = document.createElement('button');
+    submitBtn.className = "w-full py-3 mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition";
+    submitBtn.innerText = "Chấm kết quả";
+    submitBtn.onclick = () => checkTF();
+    optionsArea.appendChild(submitBtn);
+  } else {
+     showFeedback(state.status === 'correct', state.status === 'correct' ? "Bạn đã trả lời đúng tất cả các ý." : "Có ý chưa chính xác, hãy xem lại chi tiết ở trên.");
   }
 }
 
-function normalize(str) {
-  // Hàm chuẩn hóa chuỗi để so sánh (bỏ khoảng trắng, viết thường)
-  return String(str).toLowerCase().replace(/\s+/g, '');
+function checkTF() {
+  const q = currentQuestions[currentIndex];
+  const ans = userResults[currentIndex].userAns;
+  
+  // Kiểm tra xem đã chọn hết chưa
+  if (ans.a === null || ans.b === null || ans.c === null || ans.d === null) {
+    alert("Vui lòng chọn Đúng hoặc Sai cho tất cả các ý trước khi chấm.");
+    return;
+  }
+
+  // So sánh
+  let isAllCorrect = true;
+  ['a','b','c','d'].forEach(k => {
+    if (ans[k] !== q.answer[k]) isAllCorrect = false;
+  });
+
+  userResults[currentIndex].status = isAllCorrect ? 'correct' : 'wrong';
+  renderQuestion();
+}
+
+/* --- XỬ LÝ TRẢ LỜI NGẮN --- */
+function renderShort(q, state) {
+  shortAnswerArea.classList.remove('hidden');
+  const isSubmitted = state.status !== 'pending';
+  
+  if (isSubmitted) {
+    shortInput.value = state.userAns;
+    shortInput.disabled = true;
+    showFeedback(state.status === 'correct', `Đáp án đúng: ${q.answer}`);
+  } else {
+    shortInput.value = '';
+    shortInput.disabled = false;
+    shortInput.focus();
+    // Support Enter key
+    shortInput.onkeypress = (e) => {
+      if (e.key === 'Enter') checkShort();
+    };
+  }
+}
+
+function checkShort() {
+  const val = shortInput.value.trim();
+  if (!val) return;
+  
+  const q = currentQuestions[currentIndex];
+  // Chuẩn hóa: thay dấu phẩy thành chấm để so sánh số
+  const userNum = parseFloat(val.replace(',', '.'));
+  const correctNum = parseFloat(q.answer.replace(',', '.'));
+  
+  // So sánh chấp nhận sai số nhỏ
+  const isCorrect = Math.abs(userNum - correctNum) < 0.001;
+
+  userResults[currentIndex] = {
+    status: isCorrect ? 'correct' : 'wrong',
+    userAns: val
+  };
+  renderQuestion();
+}
+
+/* --- UTILS --- */
+function showFeedback(isCorrect, msg) {
+  feedback.classList.remove('hidden');
+  feedback.className = isCorrect 
+    ? "p-5 rounded-xl border mb-6 text-lg bg-emerald-950/30 border-emerald-500/50 text-emerald-200"
+    : "p-5 rounded-xl border mb-6 text-lg bg-rose-950/30 border-rose-500/50 text-rose-200";
+  
+  feedback.innerHTML = `
+    <div class="flex items-center gap-2 font-bold mb-1">
+      ${isCorrect ? '✅ CHÍNH XÁC' : '❌ CHƯA CHÍNH XÁC'}
+    </div>
+    <div class="text-base font-normal opacity-90">${msg}</div>
+  `;
+}
+
+function toggleReview() {
+  const isHidden = reviewPanel.classList.contains('hidden');
+  if (isHidden) {
+    reviewPanel.classList.remove('hidden');
+    renderReviewGrid();
+  } else {
+    reviewPanel.classList.add('hidden');
+  }
+}
+
+function renderReviewGrid() {
+  const grid = document.getElementById('reviewGrid');
+  grid.innerHTML = '';
+  
+  let done = 0, correct = 0;
+  
+  userResults.forEach((res, idx) => {
+    const btn = document.createElement('button');
+    let colorClass = "bg-slate-800 text-slate-400 border-slate-700";
+    
+    if (res.status === 'correct') {
+      colorClass = "bg-emerald-600 text-white border-emerald-500";
+      done++; correct++;
+    } else if (res.status === 'wrong') {
+      colorClass = "bg-rose-600 text-white border-rose-500";
+      done++;
+    }
+    
+    // Highlight current
+    if (idx === currentIndex) {
+      colorClass += " ring-2 ring-white";
+    }
+
+    btn.className = `p-2 rounded-lg text-sm font-bold border ${colorClass}`;
+    btn.innerText = idx + 1;
+    btn.onclick = () => {
+      currentIndex = idx;
+      renderQuestion();
+      toggleReview();
+    };
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('statDone').innerText = done;
+  document.getElementById('statCorrect').innerText = correct;
+  document.getElementById('statRate').innerText = done > 0 ? Math.round((correct/done)*100) + "%" : "0%";
 }
 
 </script>
